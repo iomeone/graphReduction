@@ -21,4 +21,10 @@ executable gr
                      , parsec
                      , graphviz
                      , directory
-                     , filepath                     
+                     , filepath     
+                     , fsnotify                
+                     , bytestring     
+                     , text      
+                     , string-conversions 
+                     , utf8-string
+                     , stringsearch

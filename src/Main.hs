@@ -43,12 +43,10 @@ compileFileWhenModified path = do
     case p of 
       Left _ -> putStrLn "wrong"
       Right program -> do
-        putStrLn $ show p
+        putStrLn $ show program
         curDir <- getCurrentDirectory
         drawAstEx ["raw"] (curDir </> "png" </> "ast") [ program ]
 
-    -- putStrLn $ show $ parse pProgram ""  src
-    
     putStrLn "-------------------------"
   else
     putStrLn $ path ++ " is changing." 
@@ -72,17 +70,4 @@ main = do
 
   watchDirectoryTree curDir compileFileWhenModified
   forever $ threadDelay 5000000
-
-
-  -- fac n = if (n==0) 1 (n * fac (n-1)) ; main = fac 4;
-
-
-  -- case parse pProgram "core" "fac n = if (n==0) 1 (n * fac (n-1)) ; main = fac 4;" of
-  --   Left  _       ->  do
-  --                       putStrLn "wrong"
-  --   Right program ->  do
-  --                       putStrLn $ show program
-  --                       curDir <- getCurrentDirectory
-  --                       drawAstEx ["raw"] (curDir </> "png" </> "ast") [ program ]
-
 

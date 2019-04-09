@@ -44,7 +44,8 @@ compileFileWhenModified path = do
       Left _ -> putStrLn "wrong"
       Right program -> do
         putStrLn $ show p
-        drawAstEx ["raw"] (path </> "png" </> "ast") [ program ]
+        curDir <- getCurrentDirectory
+        drawAstEx ["raw"] (curDir </> "png" </> "ast") [ program ]
 
     -- putStrLn $ show $ parse pProgram ""  src
     

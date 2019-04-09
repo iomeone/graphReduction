@@ -28,3 +28,11 @@ executable gr
                      , string-conversions 
                      , utf8-string
                      , stringsearch
+  if os(linux)
+    GHC-Options:        -Wall
+  else
+    if os(windows)
+      GHC-Options:      -Wall -threaded
+    else
+      if os(darwin)
+        GHC-Options:        -Wall

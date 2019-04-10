@@ -16,7 +16,7 @@ import AstDraw
 import Parser
 import Types
 import UTF8
-
+import State
 
 
 
@@ -70,4 +70,3 @@ main = do
 
   watchDirectoryTree curDir compileFileWhenModified
   forever $ threadDelay 5000000
-

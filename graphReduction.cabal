@@ -17,6 +17,14 @@ executable gr
   hs-source-dirs:      src
   main-is:             Main.hs
   default-language:    Haskell2010
+  other-modules:
+                 AstDraw
+                 ,Compile
+                 ,Graph
+                 ,Parser
+                 ,State
+                 ,Types
+                 ,UTF8
   build-depends:       base >=4.11 && <4.12
                      , parsec
                      , graphviz

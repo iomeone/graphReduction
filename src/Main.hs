@@ -13,10 +13,12 @@ import           Text.Parsec
 
 -- self defined
 import AstDraw
+import Compile
 import Parser
+import State
 import Types
 import UTF8
-import State
+
 
 
 

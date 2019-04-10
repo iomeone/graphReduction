@@ -67,7 +67,14 @@ main :: IO ()
 main = do
   curDir <- getCurrentDirectory
   src <- readUTF8File (curDir </> "htp.txt")
-  putStrLn $ show $ parse pProgram ""  src
+  p <- return $ parse pProgram ""  src
+  case p of 
+    Left _ -> putStrLn "wrong"
+    Right program -> do
+      putStrLn $ show program
+
+
+
 
 
   watchDirectoryTree curDir compileFileWhenModified

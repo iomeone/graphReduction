@@ -47,6 +47,20 @@ primitives =
     ,("if",         If)
     ]
 
+isValueNode :: Node -> Bool
+isValueNode node = isDataNode node || isNumNode node
+
+isDataNode :: Node -> Bool
+isDataNode (NData _ _) = True
+isDataNode _           = False
+
+
+isNumNode :: Node -> Bool
+isNumNode (NNum _) = True
+isNumNode _        = False
+
+
+
 
 type TiState = (TiStack, TiDump, TiHeap, TiGlobals, TiSteps)
 

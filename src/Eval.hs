@@ -107,6 +107,32 @@ scStep (stack@(stackTop : stackRest), dump, heap, globals, steps) sc argNames bo
 
 
 
+primStep :: TiState -> Primitive -> TiState
+primStep state Add = primBinary state (fromBinary (+))
+
+
+primBinary :: TiState -> (Node -> Node -> Node) -> TiState
+primBinary (stack@(_ : xRoot : yRoot : stackRest), dump, heap, globals, steps) f
+        = state1
+    where
+        (xAddr, yAddr) = (getArg heap xRoot, getArg heap yRoot)
+        (x    , y)     = (hLookup heap xAddr, hLookup heap yAddr)
+        state1
+            | isNumNode x && isNumNode y
+            = let heap1 = hUpdate heap yRoot (f x y)
+              in (yRoot : stackRest, dump, heap, globals, steps)
+              -- we update the node yRoot pointer. which is the result we compute just.
+
+
+            | not (isNumNode x)
+            = ([xAddr], [yRoot] : dump, heap, globals, steps)
+              -- if xNode is not num, we put the xAddr in the new stack, and start another stack computation.
+            | not (isNumNode y)
+            =([yAddr], [yRoot] : dump, heap, globals, steps)
+              -- if yNode is not num, we put the yAddr in the new stack, and start another stack computation.
+
+
+
 
 instantiate
         :: Expr            -- Body of super combinator
@@ -142,7 +168,8 @@ instantiateAndUpdate (EAp e1 e2) heap env addr =
 
 
 
-
+fromBinary :: (Integer -> Integer -> Integer) -> Node -> Node -> Node
+fromBinary f (NNum x) (NNum y) = NNum $ f x y
 
 
 

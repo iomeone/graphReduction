@@ -17,6 +17,9 @@ data Node =
     | NNum Integer
     -- arg1: an integer
 
+    | NInd Addr 
+    -- an indirect computation
+
     | NPrim String Primitive 
     -- arg1: primitive name
     -- arg2: the Primitive type, which define you can find in this file

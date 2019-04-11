@@ -108,6 +108,44 @@ scStep (stack@(stackTop : stackRest), dump, heap, globals, steps) sc argNames bo
 
 
 
+instantiate
+        :: Expr            -- Body of super combinator
+        -> TiHeap          -- Heap before instantiation
+        ->TiGlobals        -- Association list of names and adresses
+        ->(TiHeap, Addr)   -- Heap after instantiation, and the addr of root node
+instantiate (ENum n ) heap _ = hAlloc heap (NNum n)
+
+instantiate(EAp e1 e2) heap env = 
+    hAlloc heap2 (NAp a1 a2)
+    where
+        (heap1, a1) = instantiate e1 heap  env
+        (heap2, a2) = instantiate e2 heap1 env
+
+instantiate (EVar v) heap env = 
+    (heap, aLookup env v (error ("Undefined name " ++ show v)))
+
+
+
+instantiateAndUpdate :: Expr -> TiHeap -> TiGlobals -> Addr -> TiHeap
+instantiateAndUpdate (ENum n) heap _ addr = hUpdate heap addr (NNum n)
+
+instantiateAndUpdate (EVar v) heap env addr = 
+    hUpdate heap addr (NInd (aLookup env v (error ("Undefined name " ++ show v))))
+
+
+instantiateAndUpdate (EAp e1 e2) heap env addr = 
+    let (heap1, a1) = instantiate e1 heap env
+        (heap2, a2) = instantiate e2 heap1 env
+    in hUpdate heap2 addr (NAp a1 a2)
+    
+    
+
+
+
+
+
+
+
 
 getArgs :: TiHeap -> TiStack -> [Addr]
 getArgs heap (_ : stack) = map (getArg heap) stack

@@ -5,7 +5,6 @@ import           Control.Concurrent (threadDelay)
 import           Control.Monad      (forever)
 
 import           System.FilePath                                   -- </>
-import           System.FSNotify    (Event (..), watchTree, withManager, watchDir)
 import           System.Directory   
 
 import           Text.Parsec
@@ -18,17 +17,10 @@ import Parser
 import State
 import Types
 import UTF8
+import WatchFile
 
 
 
-
-type Action = FilePath -> IO ()
-
-callback :: Action -> Event -> IO ()
-callback action (Added filepath _ _)    = action  filepath 
-callback action (Modified filepath time b) = action filepath 
-callback action (Removed filepath _ _)  = action filepath
-callback action (Unknown  filepath _ _)  = action filepath 
 
 
 
@@ -56,12 +48,6 @@ compileFileWhenModified path = do
 
 
 
-watchDirectoryTree :: FilePath -> Action -> IO ()
-watchDirectoryTree filepath action =
-  withManager  $ \mgr -> do
-    print $ "Watching " ++ filepath
-    watchDir mgr filepath (const True) $ callback compileFileWhenModified         -- (callback action)
-    forever $ threadDelay 1000000
 
 main :: IO ()
 main = do
@@ -72,9 +58,6 @@ main = do
     Left _ -> putStrLn "wrong"
     Right program -> do
       putStrLn $ show program
-
-
-
 
 
   watchDirectoryTree curDir compileFileWhenModified

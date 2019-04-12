@@ -20,9 +20,34 @@ import Types
 import UTF8
 
 
-toEval :: TiState -> [TiState]
-toEval state = 
-    eval state
+
+addrToNode :: ([Addr], [(Addr, Node)]) -> [(Addr, Node)]
+addrToNode stackAddrList_AddrNodeList@(stackAddrList, addrNodeList)= 
+    fmap addrToAddrNode stackAddrList 
+    where 
+        addrToAddrNode :: Addr -> (Addr, Node)
+        addrToAddrNode addr = 
+            (addr, (aLookup addrNodeList addr (error "addrToAddrNode")))
+
+
+
+showStackProcess :: [([Addr], [(Addr, Node)])] -> IO ()
+showStackProcess stackAddrList_AddrNodeList_List = do
+    putStrLn $ unlines x
+    return  ()
+    where 
+        x =  fmap show (  fmap addrToNode stackAddrList_AddrNodeList_List)
+
+
+
+
+
+
+
+getStack :: TiState -> ([Addr], [(Addr, Node)])
+getStack state@(addrLst, dump, heap@(Heap size freeList addrNodeList), globals, steps) = 
+    (addrLst, addrNodeList)
+
 
 
 toCompile :: Program ->  IO ()
@@ -30,11 +55,13 @@ toCompile program = do
     putStrLn "-------------------------\n Init state is:" 
     putStrLn $ show state
     putStrLn "-------------------------\n Evaled states is:" 
-    putStrLn $ show states
-    
+    -- putStrLn $ show stackAddrList_AddrNodeList
+    showStackProcess stackAddrList_AddrNodeList
+
     where
         state = compile program
-        states = toEval state
+        states = eval state
+        stackAddrList_AddrNodeList = fmap getStack states
 
 
 

@@ -18,7 +18,7 @@ incStep = applyToSteps tiStepInc
 
 
 tiFinal :: TiState -> Bool
-tiFinal ([isOnlyDataAddr], [], heap, gloabls, steps) = isValueNode (hLookup heap isOnlyDataaddr)
+tiFinal ([isOnlyDataAddr], [], heap, gloabls, steps) = isValueNode (hLookup heap isOnlyDataAddr)
 -- if current stack has only one data, comutation is done!
 tiFinal ([]     , [], _, _, _)                       = error "Empty stack"
 tiFinal _                                            = False
@@ -51,7 +51,7 @@ dataStep (stack@(_:stackRest), dump, heap, globals, stats) tag = case  dump of
 
 
 numStep :: TiState -> Integer -> TiState
-numStep (stack@(_ : stackRest), dump, heap, gloabls, steps) n = case dump of
+numStep (stack@(_ : stackRest), dump, heap, globals, steps) n = case dump of
     d:ds | stackRest /= [] -> error "numStep: why stackRest is not empty?"
     d:ds | stackRest == [] -> (d ++ stackRest, ds, heap, globals, steps)
 
@@ -60,13 +60,13 @@ numStep (stack@(_ : stackRest), dump, heap, gloabls, steps) n = case dump of
 
 
 apStep :: TiState -> Addr -> Addr -> TiState
-apStep (stack@(top : _) , dump, heap, gloabls, steps) a1 a2 = 
+apStep (stack@(top : _) , dump, heap, globals, steps) a1 a2 = 
     case hLookup heap a2 of
         NInd a3 -> (a1 : stack, dump, hUpdate heap top (NAp a1 a3), globals, steps)
         -- if a2 is an indirect computation, we convert it to the direct computation
         -- we put a1 to the stack because we now start the a1 computation.
 
-        _ -> (a1: stack, dump, heap, gloabls, steps)
+        _ -> (a1: stack, dump, heap, globals, steps)
         -- we just simple compute the a1
 
 
@@ -189,6 +189,6 @@ getArg heap addr =
     case hLookup heap addr of
         NAp func arg     -> arg
         NInd addr           -> getArg heap addr
-        x                   -> error $ "getArg: NAp node is expected, but got " ++ show x 
+        x                   -> error $ "getArg: NAp node is expected, but got " ++ (show x )
 
 

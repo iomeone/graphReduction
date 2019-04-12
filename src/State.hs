@@ -27,7 +27,7 @@ data Node =
     | NData Integer [Addr]
     -- arg1: the tag
     -- arg2: do not known so far!
-
+    deriving Show
 
 data Primitive = 
     Neg

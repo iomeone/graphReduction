@@ -1,8 +1,26 @@
 module WatchFile where
-import           System.FilePath                                   -- </>
-import           System.FSNotify    (Event (..), watchTree, withManager, watchDir)
 import           Control.Monad      (forever)
 import           Control.Concurrent (threadDelay)
+
+import           Text.Parsec
+
+import           System.Directory  
+import           System.FilePath      
+import           System.FSNotify    (Event (..), watchTree, withManager, watchDir)
+                             -- </>
+ 
+
+
+import AstDraw
+import Compile
+import Parser
+import Types
+import UTF8
+
+
+toCompile :: Program ->  IO ()
+toCompile program = 
+    putStrLn $ show $compile $ program
 
 
 
@@ -27,6 +45,46 @@ watchDirectoryTree filepath action =
 
 
 
+compileFileWhenModified :: String -> IO ()
+compileFileWhenModified path = do
+  if takeExtension path == ".txt"
+  then do
+    putStrLn "-------------------------"
+    putStrLn $ "compiling " ++ path ++ "... "
+    src <- readUTF8File  (takeFileName path) 
+    putStrLn "source code: " >> putStrLn src
+
+    p <- return $ parse pProgram "core" src
+    case p of 
+      Left _ -> putStrLn "wrong"
+      Right program -> do
+        putStrLn $ show program
+        curDir <- getCurrentDirectory
+        drawAstEx ["raw"] (curDir </> "png" </> "ast") [ program ]
+        toCompile program
+         
+                
+
+
+
+    putStrLn "-------------------------"
+  else
+    putStrLn $ path ++ " is changing." 
 
 
     
+
+startTask :: IO ()
+startTask = do
+    curDir <- getCurrentDirectory
+    src <- readUTF8File (curDir </> "htp.txt")
+    p <- return $ parse pProgram ""  src
+    case p of 
+      Left _ -> putStrLn "wrong"
+      Right program -> do
+        putStrLn $ show program
+        toCompile program
+  
+    putStrLn "-------------------------"
+    watchDirectoryTree curDir compileFileWhenModified
+    forever $ threadDelay 5000000    

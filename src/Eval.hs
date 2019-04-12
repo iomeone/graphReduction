@@ -1,5 +1,8 @@
 module Eval where 
 
+import Debug.Trace
+
+
 
 import Types
 import State
@@ -8,7 +11,9 @@ import State
 eval :: TiState -> [TiState]
 eval state = state : restStates
     where 
+        -- restStates | tiFinal state = trace ("------------------------------------------is final node" ++ show state) []
         restStates | tiFinal state = []
+                --    | otherwise = trace ("------------------------------------------not final node" ++ show state) $ eval nextState
                    | otherwise = eval nextState
         nextState = incStep (step state)
 
@@ -113,14 +118,15 @@ primStep state Add = primBinary state (fromBinary (+))
 
 primBinary :: TiState -> (Node -> Node -> Node) -> TiState
 primBinary (stack@(_ : xRoot : yRoot : stackRest), dump, heap, globals, steps) f
-        = state1
+        -- = trace "------------------------------------------primBinary" state1
+    = state1
     where
         (xAddr, yAddr) = (getArg heap xRoot, getArg heap yRoot)
         (x    , y)     = (hLookup heap xAddr, hLookup heap yAddr)
         state1
             | isNumNode x && isNumNode y
             = let heap1 = hUpdate heap yRoot (f x y)
-              in (yRoot : stackRest, dump, heap, globals, steps)
+              in (yRoot : stackRest, dump, heap1, globals, steps)
               -- we update the node yRoot pointer. which is the result we compute just.
 
 

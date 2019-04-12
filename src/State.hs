@@ -1,5 +1,7 @@
 module State where
 
+
+import Debug.Trace
 import Types
 
 type Addr = Integer
@@ -51,7 +53,8 @@ primitives =
     ]
 
 isValueNode :: Node -> Bool
-isValueNode node = isDataNode node || isNumNode node
+isValueNode node = 
+    isDataNode node || isNumNode node
 
 isDataNode :: Node -> Bool
 isDataNode (NData _ _) = True

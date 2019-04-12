@@ -13,16 +13,28 @@ import           System.FSNotify    (Event (..), watchTree, withManager, watchDi
 
 import AstDraw
 import Compile
+import Eval
 import Parser
+import State
 import Types
 import UTF8
+
+
+toEval :: TiState -> [TiState]
+toEval state = 
+    eval state
 
 
 toCompile :: Program ->  IO ()
 toCompile program = do
     putStrLn "-------------------------\n Init state is:" 
-    putStrLn $ show $compile $ program
+    putStrLn $ show state
+    putStrLn "-------------------------\n Evaled states is:" 
+    putStrLn $ show states
     
+    where
+        state = compile program
+        states = toEval state
 
 
 

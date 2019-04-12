@@ -19,8 +19,10 @@ import UTF8
 
 
 toCompile :: Program ->  IO ()
-toCompile program = 
+toCompile program = do
+    putStrLn "-------------------------\n Init state is:" 
     putStrLn $ show $compile $ program
+    
 
 
 
@@ -56,8 +58,9 @@ compileFileWhenModified path = do
 
     p <- return $ parse pProgram "core" src
     case p of 
-      Left _ -> putStrLn "wrong"
+      Left _ -> putStrLn "wrong AST"
       Right program -> do
+        putStrLn "-------------------------\n AST is:"
         putStrLn $ show program
         curDir <- getCurrentDirectory
         drawAstEx ["raw"] (curDir </> "png" </> "ast") [ program ]
@@ -82,6 +85,7 @@ startTask = do
     case p of 
       Left _ -> putStrLn "wrong"
       Right program -> do
+        putStrLn "-------------------------\n AST is:"
         putStrLn $ show program
         toCompile program
   

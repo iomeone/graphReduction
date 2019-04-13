@@ -64,12 +64,16 @@ toCompile program = do
     showStackProcess stackAddrList_AddrNodeList_List
 
     curDir <- getCurrentDirectory
-    drawStackEx ["eval"] (curDir </> "png" </> "eval") [ stackAddrList_AddrNodeList_List ]
+    drawStackEx ["eval"] (curDir </> "png" </> "eval") [  reverstack stackAddrList_AddrNodeList_List ]
 
     where
         state = compile program
         states = eval state
         stackAddrList_AddrNodeList_List = fmap getStack states
+        reverstack :: [([Addr], [(Addr, Node)])] -> [([Addr], [(Addr, Node)])] 
+        reverstack ((addrlist, assocList) : xs) = 
+            (reverse addrlist, assocList) : (reverstack xs)
+        reverstack [] = []
 
 
 

@@ -14,18 +14,21 @@ joinBy sep list = drop (length sep) $ concat $ map (\item -> sep ++ item) list
 
 
 graphStackItems :: String ->Stack -> GraphBuilder ()
-graphStackItems parent (stack@(addr : addrs), heapAssoc) = (do
+graphStackItems parent (stack@(addr : addrs), heapAssoc) = do
     
     addrStr <- addNode (show addr) VVar
 
-    graphNode addrStr (aLookup heapAssoc addr (error "graphStackItems：graphNode")) heapAssoc
+    nodeStr <- graphNode addrStr (aLookup heapAssoc addr (error "graphStackItems：graphNode")) heapAssoc
 
-    return addrStr)
-    >>= (do
-        if parent == "" 
-        then \node -> return () 
-        else \node -> addEdge parent node) 
-    >> graphStackItems "" (addrs, heapAssoc)
+    -- return addrStr)
+    
+    if parent == "" 
+    then return () 
+    else do
+         addEdge parent addrStr
+         
+   
+    graphStackItems nodeStr (addrs, heapAssoc)   -- next stack item draw
 
 
 graphStackItems parent (stack @ [], heapAssoc) = do
@@ -55,7 +58,7 @@ graphStackItems parent (stack @ [], heapAssoc) = do
 --     -- arg1: the tag
 --     -- arg2: do not known so far!
 --     deriving Show
-graphNode :: String -> Node -> [(Addr, Node)] -> GraphBuilder ()
+graphNode :: String -> Node -> [(Addr, Node)] -> GraphBuilder String
 graphNode parent n heapAssoc =  -- ?? shall we avoid to cyclic draw Node, we cound add count parameter, when count > 100 , we abandoned the draw.
     (case n of
         NAp addr1 addr2 -> do
@@ -89,10 +92,12 @@ graphNode parent n heapAssoc =  -- ?? shall we avoid to cyclic draw Node, we cou
             addNode ("NData " ++ show tag ++ show argList) VValue
 
 
-    ) >>= (do
+    ) >>= (
         if parent == "" 
-          then \node -> return () 
-          else \node -> addEdge parent node) --addEdge parent
+          then \node -> return node
+          else \node -> do
+                        addEdge parent node
+                        return node) --addEdge parent
 
 
 

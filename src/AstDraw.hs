@@ -12,10 +12,7 @@ import Graph
 --           | TmApp Expr Expr
 --           | TmBind String -- not really a term, just a binding a free variable
 --             deriving (Show, Eq)
-
-
--- getId:: NodeState -> String -> String
--- getId nodeState des = fst nodeState ++ "----" ++ des
+ 
 build :: GraphBuilder a -> GraphBuilderState -> (a, GraphBuilderState)
 build (GB f) s = f s
 
@@ -87,10 +84,6 @@ termToClusterId moduleName terms =
   zipWith (\a b -> (moduleName ++ show b,a)) terms [1..]
 
 
-labelTerms :: String -> [ScDefn] ->  [(String, ScDefn)]
-labelTerms moduleName terms  = 
-  termToClusterId moduleName terms
-
 
 graphATerm:: String -> ScDefn -> GraphBuilder ()
 graphATerm header t = do
@@ -113,7 +106,7 @@ graphAllTermHelper termids =
 
 
 graphAllTerm :: String -> [ScDefn] -> ([V], [E])
-graphAllTerm moduleName terms = graphAllTermHelper $ labelTerms moduleName terms
+graphAllTerm moduleName terms = graphAllTermHelper $ termToClusterId moduleName terms
   
 
 

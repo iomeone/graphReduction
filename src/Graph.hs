@@ -168,7 +168,8 @@ fileGraphParams = G.defaultParams {
   G.fmtNode = \(v, VLabel description vl) -> case vl of
       VVar     -> ( G.toLabel description) : (G.Shape G.Circle) : ( colorAttribute $ G.RGB 0 255 255)
       VLAMBDA  -> ( G.toLabel description) :  (colorAttribute $ G.RGB 200 0 0)
-      VApp     -> ( G.toLabel description) : (colorAttribute $ G.RGB 80 80 200),
+      VApp     -> ( G.toLabel description) : (colorAttribute $ G.RGB 80 80 200)
+      VValue     -> ( G.toLabel description) : (colorAttribute $ G.RGB 80 80 200),
   G.fmtEdge = \(from, to, el) -> case el of
       ELHardlink -> colorAttribute $ G.RGB 0 0 200
       ELSymlink  -> colorAttribute $ G.RGB 40 255 40

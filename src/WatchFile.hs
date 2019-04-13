@@ -15,9 +15,15 @@ import AstDraw
 import Compile
 import Eval
 import Parser
+import StackDraw
 import State
 import Types
 import UTF8
+
+
+-- draw_Addr_Node_List :: [(Addr, Node)] -> 
+
+
 
 
 
@@ -55,13 +61,15 @@ toCompile program = do
     putStrLn "-------------------------\n Init state is:" 
     putStrLn $ show state
     putStrLn "-------------------------\n Evaled states is:" 
-    -- putStrLn $ show stackAddrList_AddrNodeList
-    showStackProcess stackAddrList_AddrNodeList
+    showStackProcess stackAddrList_AddrNodeList_List
+
+    curDir <- getCurrentDirectory
+    drawStackEx ["eval_stack"] (curDir </> "png" </> "eval") [ stackAddrList_AddrNodeList_List ]
 
     where
         state = compile program
         states = eval state
-        stackAddrList_AddrNodeList = fmap getStack states
+        stackAddrList_AddrNodeList_List = fmap getStack states
 
 
 

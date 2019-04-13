@@ -13,25 +13,23 @@ type Stack = ([Addr], [(Addr, Node)])
 joinBy sep list = drop (length sep) $ concat $ map (\item -> sep ++ item) list
 
 
-graphStackItems :: String ->Stack -> GraphBuilder ()
-graphStackItems parent (stack@(addr : addrs), heapAssoc) = do
+graphStackItems :: String ->Stack -> Maybe VLabeltype -> Maybe ELabel -> GraphBuilder ()
+graphStackItems parent (stack@(addr : addrs), heapAssoc) lblType edgeType = do
     
-    addrStr <- addNode (show addr) VVar
+    addrStr <- addNode (show addr) (maybe VVar id lblType)
 
     nodeStr <- graphNode addrStr (aLookup heapAssoc addr (error "graphStackItems：graphNode")) heapAssoc
-
-    -- return addrStr)
     
     if parent == "" 
     then return () 
     else do
-         addEdge parent addrStr
+         addEdge_ parent addrStr (maybe ELSymlink id edgeType)
          
    
-    graphStackItems nodeStr (addrs, heapAssoc)   -- next stack item draw
+    graphStackItems nodeStr (addrs, heapAssoc) (Just VStack)  (Just EStackLink)-- next stack item draw
 
 
-graphStackItems parent (stack @ [], heapAssoc) = do
+graphStackItems parent (stack @ [], heapAssoc) lblType edgeType= do
     return ()
 
 -- data Node = 
@@ -122,8 +120,8 @@ graphNode parent n heapAssoc =  -- ?? shall we avoid to cyclic draw Node, we cou
 
 graphAStack :: String ->Stack -> GraphBuilder ()
 graphAStack  stackName  stack = do
-    parent <- addNode stackName VVar
-    graphStackItems parent  stack
+    parent <- addNode stackName VStackName
+    graphStackItems parent  stack Nothing (Just ENameLink)
 
 
 

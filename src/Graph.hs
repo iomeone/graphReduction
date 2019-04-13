@@ -16,13 +16,14 @@ import Types
 
 -- type CoreExpr = Term
 
-data VLabeltype =  VLAMBDA | VApp | VVar | VValue
+data VLabeltype =  VLAMBDA | VApp | VVar | VValue | VStack | VStackName
 data  VLabel =VLabel String VLabeltype
 
 type V = (String, VLabel)
 
-data ELabel = ELHardlink
+data ELabel = EStackLink
             | ELSymlink
+            | ENameLink
 
 type E = (String, String, ELabel)
 
@@ -167,12 +168,16 @@ fileGraphParams = G.defaultParams {
     ],
   G.fmtNode = \(v, VLabel description vl) -> case vl of
       VVar     -> ( G.toLabel description) : (G.Shape G.Circle) : ( colorAttribute $ G.RGB 0 255 255)
-      VLAMBDA  -> ( G.toLabel description) :  (colorAttribute $ G.RGB 200 0 0)
-      VApp     -> ( G.toLabel description) : (colorAttribute $ G.RGB 80 80 200)
-      VValue     -> ( G.toLabel description) : (colorAttribute $ G.RGB 80 80 200),
+      VLAMBDA  -> ( G.toLabel description) :  (colorAttribute $ G.RGB 226 94 118)
+      VApp     -> ( G.toLabel description) : (colorAttribute $ G.RGB 7 102 148)
+      VStack     -> ( G.toLabel description) : (colorAttribute $ G.RGBA 0 0 0 0)
+      VStackName     -> ( G.toLabel description) : (colorAttribute $ G.RGBA 0 0 0 0)
+      VValue     -> ( G.toLabel description) : (colorAttribute $ G.RGB 3 183 198),
+      
   G.fmtEdge = \(from, to, el) -> case el of
-      ELHardlink -> colorAttribute $ G.RGB 0 0 200
-      ELSymlink  -> colorAttribute $ G.RGB 40 255 40
+      EStackLink -> colorAttribute $ G.RGBA 0 0 0 5
+      ELSymlink  -> colorAttribute $ G.RGB 109 187 253
+      ENameLink ->  colorAttribute $ G.RGBA 0 0 0 0
       } 
   where
     colorAttribute color = [ G.Color $ G.toColorList [ color ] ]
@@ -187,11 +192,11 @@ fileGraphParams = G.defaultParams {
 --                          dotText = G.printDotGraph dotGraph :: TL.Text
 --                      in TL.unpack dotText  
 
-tgb :: GraphBuilder ()
-tgb = do
-  h <- addNode_ "hello" VApp
-  w <- addNode_ "world" VLAMBDA
-  addEdge_ h w ELHardlink
+-- tgb :: GraphBuilder ()
+-- tgb = do
+--   h <- addNode_ "hello" VApp
+--   w <- addNode_ "world" VLAMBDA
+--   addEdge_ h w EStackLink
 
 
 

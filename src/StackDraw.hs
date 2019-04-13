@@ -25,8 +25,11 @@ graphStackItems parent (stack@(addr : addrs), heapAssoc) = (do
         if parent == "" 
         then \node -> return () 
         else \node -> addEdge parent node) 
+    >> graphStackItems "" (addrs, heapAssoc)
 
 
+graphStackItems parent (stack @ [], heapAssoc) = do
+    return ()
 
 -- data Node = 
 --     NAp Addr Addr 
@@ -57,8 +60,15 @@ graphNode parent n heapAssoc =  -- ?? shall we avoid to cyclic draw Node, we cou
     (case n of
         NAp addr1 addr2 -> do
             appN <- addNode "app" VApp
-            graphNode appN (aLookup heapAssoc addr1 (error "graphStackItems：graphNode")) heapAssoc
-            graphNode appN (aLookup heapAssoc addr2 (error "graphStackItems：graphNode")) heapAssoc
+            a1 <- addNode (show addr1) VValue
+            a2 <- addNode (show addr2) VValue
+
+            addEdge appN a1
+            addEdge appN a2
+
+            -- graphNode a1 (aLookup heapAssoc addr1 (error "graphStackItems：graphNode")) heapAssoc
+            -- graphNode a2 (aLookup heapAssoc addr2 (error "graphStackItems：graphNode")) heapAssoc
+
             return appN
         NSupercomb funName argNameList expr -> do
             funDef <- addNode (funName ++ " " ++ (joinBy " ," argNameList) ) VLAMBDA

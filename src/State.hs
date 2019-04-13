@@ -146,6 +146,18 @@ aLookup ((k', v) :as) k def | k == k' = v
                             | otherwise = aLookup as k def
 
 
+aLookUpValueNode :: (Eq k) => Assoc k Node -> k -> Node ->  Maybe Node
+aLookUpValueNode [] _ def = Just def
+
+aLookUpValueNode((k', v) : as) k def | k == k' = if (isValueNode v) then Just v else Nothing
+                                     | otherwise = aLookUpValueNode as k def
+
+-- isValueNode :: Node -> Bool
+-- isValueNode node
+isValueNode2 :: Node -> Maybe Node
+isValueNode2 v= 
+    if (isValueNode v) then Just v else Nothing
+
 hLookup :: Heap a -> Addr -> a
 hLookup (Heap _ _ xs) a = 
     aLookup xs a (error ("Heap.hLookup - can't find address " ++ show a))

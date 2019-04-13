@@ -61,8 +61,19 @@ graphNode parent n heapAssoc =  -- ?? shall we avoid to cyclic draw Node, we cou
     (case n of
         NAp addr1 addr2 -> do
             appN <- addNode "app" VApp
-            a1 <- addNode (show addr1) VValue
-            a2 <- addNode (show addr2) VValue
+
+                          
+            a1 <- addNode (maybe (show addr1)  
+                                  -- if addr1 is not ValueNode, we just show addr1.
+                                    (\numNode -> show addr1 ++ " " ++ (show numNode)) $ aLookUpValueNode heapAssoc addr1 (error "addr1")) 
+                                   -- if addr1 is  ValueNode, we  show addr1 ++ (show Node).
+                                    VValue
+
+            a2 <- addNode (maybe (show addr2) 
+                                 -- if addr2 is not ValueNode, we just show addr1.
+                                 (\numNode -> show addr2 ++ " " ++ (show numNode)) $ aLookUpValueNode heapAssoc addr2 (error "addr2")) 
+                                  -- if addr2 is  ValueNode, we  show addr2 ++ (show Node).
+                                  VValue
 
             addEdge appN a1
             addEdge appN a2

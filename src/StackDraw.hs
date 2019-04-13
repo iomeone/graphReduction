@@ -62,7 +62,8 @@ graphNode parent n heapAssoc =  -- ?? shall we avoid to cyclic draw Node, we cou
             return appN
         NSupercomb funName argNameList expr -> do
             funDef <- addNode (funName ++ " " ++ (joinBy " ," argNameList) ) VLAMBDA
-            addNode (funDef ++ (show expr)) VValue 
+            b <- addNode (show expr) VValue 
+            addEdge funDef b
             return funDef  -- the only reason to return funDef, is to pass the appN to the follow if else clausure.
         
         NNum i -> do

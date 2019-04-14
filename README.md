@@ -8,4 +8,8 @@ Published by Prentice Hall | January 1992
 
 ## factorial AST Tree
 
-![architecture.png](https://raw.githubusercontent.com/iomeone/graphReduction/master/png/factorial.png)  
+![factorial.png](https://raw.githubusercontent.com/iomeone/graphReduction/master/png/factorial.png)  
+
+## simple Math Graph Reduction
+# stack is grow upward
+![simpleMathGraphReduction.png](https://raw.githubusercontent.com/iomeone/graphReduction/master/png/simpleMathGraphReduction.png)  

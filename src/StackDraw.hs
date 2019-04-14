@@ -131,7 +131,7 @@ graphNode parent n heapAssoc =  -- ?? shall we avoid to cyclic draw Node, we cou
 
 graphAStack :: String ->Stack -> GraphBuilder ()
 graphAStack  stackName  stack = do
-    parent <- addNode stackName VStackName
+    parent <- addNode (stackName ++ "                                                                       ")  VStackName
     graphStackItems parent  stack Nothing (Just ENameLink)
 
 

@@ -4,6 +4,9 @@ import qualified Data.GraphViz as G
 import qualified Data.GraphViz.Attributes.Complete as G
 import qualified Data.GraphViz.Types as G
 
+import qualified Data.GraphViz.Attributes as A
+
+
 import Types
 -- import qualified Data.Text.Lazy as TL
 
@@ -155,9 +158,20 @@ fileGraphParams = G.defaultParams {
     [ G.GraphAttrs
       [ G.Overlap (G.PrismOverlap Nothing)
       , G.OutputOrder G.EdgesFirst
-      , G.RankDir G.FromTop
+      , G.RankDir G.FromBottom
       , G.BgColor [G.toWColor G.Transparent]
+      , G.BgColor [G.toWColor G.YellowGreen]
+      --   , G.Ratio $ G.AspectRatio 20  -- aspect is not right!
+      , G.Ratio $ G.ExpandRatio    
+    --   , G.Ratio $ G.FillRatio
+    --   , G.Size $ G.GSize { G.width = 26.66, G.height = Just 2.33 , G.desiredSize  = True}   -- too wide !!!
 
+    -- , G.Mode $ G.SpringMode
+    --   , G.Smoothing $  G.TriangleSmooth
+    --   , G.Pack $ G.PackMargin 1000
+    --   , G.PackMode $ G.PackArray True True $ Just 1000
+    --   , G.Overlap $ G.ScaleOverlaps
+        -- , G.Model G.SubSet
       ]
     , G.NodeAttrs
        [ G.Style
@@ -175,8 +189,8 @@ fileGraphParams = G.defaultParams {
       VValue     -> ( G.toLabel description) : (colorAttribute $ G.RGB 3 183 198),
       
   G.fmtEdge = \(from, to, el) -> case el of
-      EStackLink -> colorAttribute $ G.RGBA 0 0 0 5
-      ELSymlink  -> colorAttribute $ G.RGB 109 187 253
+      EStackLink -> (A.style  A.dotted)  : (colorAttribute $ G.RGBA 0 0 0 20) 
+      ELSymlink  -> (colorAttribute $ G.RGB 109 187 253)
       ENameLink ->  colorAttribute $ G.RGBA 0 0 0 0
       } 
   where

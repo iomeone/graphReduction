@@ -11,5 +11,5 @@ Published by Prentice Hall | January 1992
 ![factorial.png](https://raw.githubusercontent.com/iomeone/graphReduction/master/png/factorial.png)  
 
 ## simple Math Graph Reduction
-# stack is grow upward
+### stack is grow upward
 ![simpleMathGraphReduction.png](https://raw.githubusercontent.com/iomeone/graphReduction/master/png/simpleMathGraphReduction.png)  

@@ -116,6 +116,48 @@ primStep :: TiState -> Primitive -> TiState
 primStep state Add = primBinary state (fromBinary (+))
 
 
+
+primStep state (Construct tag arity) = primConstruct state tag arity
+primStep state If = primIf state
+
+primStep state x = error $ "-----------error :" ++ show x
+
+
+
+primIf :: TiState -> TiState
+primIf (stack@(_ : condition : trueApp : falseApp : restStack), dump, heap, gloabls, stats) = 
+    let
+        (condAddr, trueAddr, falseAddr) = 
+            (getArg heap condition, getArg heap trueApp, getArg heap falseApp)
+         
+        conditionNode = hLookup heap condAddr
+        
+        state1
+            | isTrueNode conditionNode
+            =(trueApp : restStack, dump, hUpdate heap trueApp (NInd trueAddr) , gloabls, stats)
+            
+            | isFalseNode conditionNode
+            =(falseApp : restStack, dump, hUpdate heap falseApp (NInd falseAddr), gloabls, stats)
+
+
+            | isValueNode conditionNode
+            = error "number in if condition"
+
+            | otherwise
+            = ([condAddr], stack : dump, heap, gloabls, stats)
+    in
+        state1
+
+
+primConstruct :: TiState -> Integer -> Integer -> TiState
+primConstruct (stack@(root : restStack), dump, heap, globals, steps) tag arity
+    = let args = take (fromIntegral arity) (getArgs heap stack)
+          stackNew = drop (length args) stack
+
+          heap1 = hUpdate heap (head stackNew) (NData tag args)
+       in (stackNew, dump, heap1, globals, steps)
+
+
 primBinary :: TiState -> (Node -> Node -> Node) -> TiState
 primBinary (stack@(_ : xRoot : yRoot : stackRest), dump, heap, globals, steps) f
         -- = trace "------------------------------------------primBinary" state1

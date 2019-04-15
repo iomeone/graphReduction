@@ -50,6 +50,11 @@ primitives =
     ,("*",          Mul)
     ,("/",          Div)
     ,("if",         If)
+
+
+    
+    ,("True" , Construct 0 0)
+    ,("False", Construct 1 0)
     ]
 
 isValueNode :: Node -> Bool
@@ -64,6 +69,15 @@ isDataNode _           = False
 isNumNode :: Node -> Bool
 isNumNode (NNum _) = True
 isNumNode _        = False
+
+
+isTrueNode :: Node -> Bool
+isTrueNode (NData 0 []) = True
+isTrueNode _            = False
+
+isFalseNode :: Node -> Bool
+isFalseNode (NData 1 []) = True
+isFalseNode _            = False
 
 
 

@@ -158,6 +158,7 @@ fileGraphParams = G.defaultParams {
     [ G.GraphAttrs
       [ G.Overlap (G.PrismOverlap Nothing)
       , G.OutputOrder G.EdgesFirst
+    --   , G.RankDir G.FromTop
       , G.RankDir G.FromBottom
       , G.BgColor [G.toWColor G.Transparent]
       , G.BgColor [G.toWColor G.YellowGreen]

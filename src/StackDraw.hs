@@ -171,8 +171,8 @@ graphNode parent n heapAssoc restStackAddr edgeType=  -- ?? shall we avoid to cy
 
 
 graphAStack :: String ->Stack -> GraphBuilder ()
-graphAStack  stackName  stack = do
-    parent <- addNode (stackName ++ "                                                                       ")  VStackName
+graphAStack  stackName  stack@(stackAddrs@(addrs), heapAssoc) = do
+    parent <- addNode (stackName ++  (take ((length addrs) * 20) $ repeat  ' '))  VStackName
     graphStackItems (NameStr parent)  stack Nothing (Just ENameLink)
 
 

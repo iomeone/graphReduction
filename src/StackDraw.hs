@@ -10,23 +10,41 @@ import State
 
 type Stack = ([Addr], [(Addr, Node)])
 
+data ParentString = NodeStr String | NameStr String | NoName
+
 joinBy sep list = drop (length sep) $ concat $ map (\item -> sep ++ item) list
 
 
-graphStackItems :: String ->Stack -> Maybe VLabeltype -> Maybe ELabel -> GraphBuilder ()
-graphStackItems parent (stack@(addr : addrs), heapAssoc) lblType edgeType = do
+graphStackItems :: ParentString ->Stack -> Maybe VLabeltype -> Maybe ELabel -> GraphBuilder ()
+graphStackItems parentStr (stack@(addr : addrs), heapAssoc) lblType edgeType = do
     
-    addrStr <- addNode (show addr) (maybe VVar id lblType)
+    
 
-    nodeStr <- graphNode addrStr (aLookup heapAssoc addr (error "graphStackItems：graphNode")) heapAssoc addrs
-    
-    if parent == "" 
-    then return () 
-    else do
-         addEdge_ parent addrStr (maybe ELSymlink id edgeType)
-         
+    (case parentStr of 
+        NameStr s -> do
+            addrStr <- addNode (show addr) (maybe VVar id lblType)
+            nodeStr <- graphNode addrStr (aLookup heapAssoc addr (error "graphStackItems：graphNode")) heapAssoc addrs ELSymlink
+            addEdge_ s addrStr (maybe ELSymlink id edgeType)
+            return nodeStr
+            
+            
+        NoName    -> do
+            addrStr <- addNode (show addr) (maybe VVar id lblType)
+            nodeStr <- graphNode addrStr (aLookup heapAssoc addr (error "graphStackItems：graphNode")) heapAssoc addrs ELSymlink
+            return nodeStr
+
+        NodeStr s -> do
+            nodeStr <- graphNode s (aLookup heapAssoc addr (error "graphStackItems：graphNode")) heapAssoc addrs EStackLink
+            -- this nodeStr is not the root of one node,  it is the node which is the same addr as next stack Node addr.
+            -- addEdge_ s nodeStr (maybe ELSymlink id edgeType)
+            return nodeStr
+        ) 
+            
+            
+    >>= \ x -> graphStackItems (NodeStr x) (addrs, heapAssoc) (Just VStack)  (Just EStackLink)-- next stack item draw 
+
+           
    
-    graphStackItems nodeStr (addrs, heapAssoc) (Just VStack)  (Just EStackLink)-- next stack item draw
 
 
 graphStackItems parent (stack @ [], heapAssoc) lblType edgeType= do
@@ -56,9 +74,9 @@ graphStackItems parent (stack @ [], heapAssoc) lblType edgeType= do
 --     -- arg1: the tag
 --     -- arg2: do not known so far!
 --     deriving Show
-graphNode :: String -> Node -> [(Addr, Node)] -> [Addr] -> GraphBuilder String
-graphNode parent n heapAssoc restStackAddr =  -- ?? shall we avoid to cyclic draw Node, we cound add count parameter, when count > 100 , we abandoned the draw.
-    (case n of
+graphNode :: String -> Node -> [(Addr, Node)] -> [Addr] -> ELabel -> GraphBuilder String
+graphNode parent n heapAssoc restStackAddr edgeType=  -- ?? shall we avoid to cyclic draw Node, we cound add count parameter, when count > 100 , we abandoned the draw.
+    case n of
         NAp addr1 addr2 -> do
             appN <- addNode "app" VApp
 
@@ -78,8 +96,11 @@ graphNode parent n heapAssoc restStackAddr =  -- ?? shall we avoid to cyclic dra
             addEdge appN a1
             addEdge appN a2
 
+            
+
             -- graphNode a1 (aLookup heapAssoc addr1 (error "graphStackItems：graphNode")) heapAssoc
             -- graphNode a2 (aLookup heapAssoc addr2 (error "graphStackItems：graphNode")) heapAssoc
+            addEdge_ parent appN edgeType
             if restStackAddr == []
                 then return appN
                 else if head restStackAddr == addr1
@@ -87,33 +108,46 @@ graphNode parent n heapAssoc restStackAddr =  -- ?? shall we avoid to cyclic dra
                         else if head restStackAddr == addr2
                             then return a2
                             else return appN
- 
+            
+           
                             
         NSupercomb funName argNameList expr -> do
             funDef <- addNode (funName ++ " " ++ (joinBy " ," argNameList) ) VLAMBDA
             b <- addNode (show expr) VValue 
             addEdge funDef b
-            return funDef  -- the only reason to return funDef, is to pass the appN to the follow if else clausure.
+
+            addEdge_ parent funDef edgeType
+            return funDef
+            -- return funDef  -- the only reason to return funDef, is to pass the appN to the follow if else clausure.
         
         NNum i -> do
-            addNode (show i)  VValue
+            n <- addNode (show i)  VValue
+            addEdge_ parent n edgeType
+            return n
 
         NInd addr -> do
-            addNode ("NInd " ++ show addr) VValue
+            n <- addNode ("NInd " ++ show addr) VValue
+            addEdge_ parent n edgeType
+            return n
 
         NPrim str primitive -> do
-            addNode ("primitive " ++ str) VValue
+            n <- addNode ("primitive " ++ str) VValue
+            addEdge_ parent n edgeType
+            return n
         
         NData tag argList -> do
-            addNode ("NData " ++ show tag ++ show argList) VValue
+            n <- addNode ("NData " ++ show tag ++ show argList) VValue
+            addEdge_ parent n edgeType
+            return n
 
 
-    ) >>= (
-        if parent == "" 
-          then \node -> return node
-          else \node -> do
-                        addEdge parent node
-                        return node) --addEdge parent
+    
+    -- >>= (
+    --     if parent == "" 
+    --       then \node -> return node
+    --       else \node -> do
+    --                     addEdge parent node
+    --                     return node) --addEdge parent
 
 
 
@@ -139,7 +173,7 @@ graphNode parent n heapAssoc restStackAddr =  -- ?? shall we avoid to cyclic dra
 graphAStack :: String ->Stack -> GraphBuilder ()
 graphAStack  stackName  stack = do
     parent <- addNode (stackName ++ "                                                                       ")  VStackName
-    graphStackItems parent  stack Nothing (Just ENameLink)
+    graphStackItems (NameStr parent)  stack Nothing (Just ENameLink)
 
 
 

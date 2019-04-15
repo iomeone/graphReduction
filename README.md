@@ -10,6 +10,6 @@ Published by Prentice Hall | January 1992
 
 ![factorial.png](https://raw.githubusercontent.com/iomeone/graphReduction/master/png/factorial.png)  
 
-## Simple programm (main = 1+2; )'s  Graph Reduction Process !
+## Simple programm (main = 1+2+3; )'s  Graph Reduction Process !
 ### stack is grow upward
 ![simpleMathGraphReduction.png](https://raw.githubusercontent.com/iomeone/graphReduction/master/png/simpleMathGraphReduction.png)  

@@ -18,7 +18,7 @@ graphStackItems parent (stack@(addr : addrs), heapAssoc) lblType edgeType = do
     
     addrStr <- addNode (show addr) (maybe VVar id lblType)
 
-    nodeStr <- graphNode addrStr (aLookup heapAssoc addr (error "graphStackItems：graphNode")) heapAssoc
+    nodeStr <- graphNode addrStr (aLookup heapAssoc addr (error "graphStackItems：graphNode")) heapAssoc addrs
     
     if parent == "" 
     then return () 
@@ -56,8 +56,8 @@ graphStackItems parent (stack @ [], heapAssoc) lblType edgeType= do
 --     -- arg1: the tag
 --     -- arg2: do not known so far!
 --     deriving Show
-graphNode :: String -> Node -> [(Addr, Node)] -> GraphBuilder String
-graphNode parent n heapAssoc =  -- ?? shall we avoid to cyclic draw Node, we cound add count parameter, when count > 100 , we abandoned the draw.
+graphNode :: String -> Node -> [(Addr, Node)] -> [Addr] -> GraphBuilder String
+graphNode parent n heapAssoc restStackAddr =  -- ?? shall we avoid to cyclic draw Node, we cound add count parameter, when count > 100 , we abandoned the draw.
     (case n of
         NAp addr1 addr2 -> do
             appN <- addNode "app" VApp
@@ -80,8 +80,15 @@ graphNode parent n heapAssoc =  -- ?? shall we avoid to cyclic draw Node, we cou
 
             -- graphNode a1 (aLookup heapAssoc addr1 (error "graphStackItems：graphNode")) heapAssoc
             -- graphNode a2 (aLookup heapAssoc addr2 (error "graphStackItems：graphNode")) heapAssoc
-
-            return appN
+            if restStackAddr == []
+                then return appN
+                else if head restStackAddr == addr1
+                        then   return a1    
+                        else if head restStackAddr == addr2
+                            then return a2
+                            else return appN
+ 
+                            
         NSupercomb funName argNameList expr -> do
             funDef <- addNode (funName ++ " " ++ (joinBy " ," argNameList) ) VLAMBDA
             b <- addNode (show expr) VValue 

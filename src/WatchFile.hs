@@ -64,7 +64,7 @@ toCompile program = do
     showStackProcess stackAddrList_AddrNodeList_List
 
     curDir <- getCurrentDirectory
-    drawStackEx ["eval"] (curDir </> "png" </> "eval") [  reverstack stackAddrList_AddrNodeList_List ]
+    drawStackEx ["eval step:"] (curDir </> "png" </> "eval") [  reverstack stackAddrList_AddrNodeList_List ]
 
     where
         state = compile program

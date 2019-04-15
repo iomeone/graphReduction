@@ -161,7 +161,9 @@ fileGraphParams = G.defaultParams {
     --   , G.RankDir G.FromTop
       , G.RankDir G.FromBottom
       , G.BgColor [G.toWColor G.Transparent]
-      , G.BgColor [G.toWColor G.YellowGreen]
+    --   , G.BgColor [G.toWColor G.YellowGreen]
+    , G.BgColor [G.toWC   $ G.RGB 217 209 181]
+  
       --   , G.Ratio $ G.AspectRatio 20  -- aspect is not right!
       , G.Ratio $ G.ExpandRatio    
     --   , G.Ratio $ G.FillRatio

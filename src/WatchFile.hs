@@ -138,6 +138,7 @@ startTask = do
       Right program -> do
         putStrLn "-------------------------\n AST is:"
         putStrLn $ show program
+        drawAstEx ["raw"] (curDir </> "png" </> "ast") [ program ]
         toCompile program
   
     putStrLn "-------------------------"

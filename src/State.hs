@@ -79,6 +79,7 @@ primitives =
 isValueNode :: Node -> Bool
 isValueNode node = 
     isDataNode node || isNumNode node
+    
 
 isDataNode :: Node -> Bool
 isDataNode (NData _ _) = True
@@ -90,6 +91,20 @@ isNumNode (NNum _) = True
 isNumNode _        = False
 
 
+
+isValueNodeSimple :: Node -> Bool
+isValueNodeSimple node = 
+    isDataNodeSimple node || isNumNodeSimple node
+
+
+isDataNodeSimple :: Node -> Bool
+isDataNodeSimple (NData _ _) = True
+isDataNodeSimple _           = False
+
+
+isNumNodeSimple :: Node -> Bool
+isNumNodeSimple (NNum _) = True
+isNumNodeSimple _        = False
 -- isTrueNode :: Node -> Bool
 -- isTrueNode (NData 0 []) = True
 -- isTrueNode _            = False
@@ -197,7 +212,7 @@ aLookup ((k', v) :as) k def | k == k' = v
 aLookUpValueNode :: (Eq k) => Assoc k Node -> k -> Node ->  Maybe Node
 aLookUpValueNode [] _ def = Just def
 
-aLookUpValueNode((k', v) : as) k def | k == k' = if (isValueNode v) then Just v else Nothing
+aLookUpValueNode((k', v) : as) k def | k == k' = if (isValueNodeSimple v) then Just v else Nothing
                                      | otherwise = aLookUpValueNode as k def
 
 -- isValueNode :: Node -> Bool

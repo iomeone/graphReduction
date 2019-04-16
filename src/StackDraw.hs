@@ -85,13 +85,16 @@ graphNode parent n heapAssoc restStackAddr edgeType=  -- ?? shall we avoid to cy
                                   -- if addr1 is not ValueNode, we just show addr1.
                                     (\numNode -> show addr1 ++ " " ++ (show numNode)) $ aLookUpValueNode heapAssoc addr1 (error "addr1")) 
                                    -- if addr1 is  ValueNode, we  show addr1 ++ (show Node).
-                                    VValue
+                                    VVar
 
             a2 <- addNode (maybe (show addr2) 
                                  -- if addr2 is not ValueNode, we just show addr1.
                                  (\numNode -> show addr2 ++ " " ++ (show numNode)) $ aLookUpValueNode heapAssoc addr2 (error "addr2")) 
                                   -- if addr2 is  ValueNode, we  show addr2 ++ (show Node).
-                                  VValue
+                                 (if isValueNodeSimple (aLookup heapAssoc addr2 (error "addr2.")) 
+                                    then VNum 
+                                    else VVar  
+                                 )
 
             addEdge appN a1
             addEdge appN a2
@@ -113,7 +116,7 @@ graphNode parent n heapAssoc restStackAddr edgeType=  -- ?? shall we avoid to cy
                             
         NSupercomb funName argNameList expr -> do
             funDef <- addNode (funName ++ " " ++ (joinBy " ," argNameList) ) VLAMBDA
-            b <- addNode (show expr) VValue 
+            b <- addNode (show expr) VVar 
             addEdge funDef b
 
             addEdge_ parent funDef edgeType
@@ -121,22 +124,22 @@ graphNode parent n heapAssoc restStackAddr edgeType=  -- ?? shall we avoid to cy
             -- return funDef  -- the only reason to return funDef, is to pass the appN to the follow if else clausure.
         
         NNum i -> do
-            n <- addNode (show i)  VValue
+            n <- addNode (show i)  VNum
             addEdge_ parent n edgeType
             return n
 
         NInd addr -> do
-            n <- addNode ("NInd " ++ show addr) VValue
+            n <- addNode ("NInd " ++ show addr) VVar
             addEdge_ parent n edgeType
             return n
 
         NPrim str primitive -> do
-            n <- addNode ("primitive " ++ str) VValue
+            n <- addNode ("primitive " ++ str) VVar
             addEdge_ parent n edgeType
             return n
         
         NData tag argList -> do
-            n <- addNode ("NData " ++ show tag ++ show argList) VValue
+            n <- addNode ("NData " ++ show tag ++ show argList) VVar
             addEdge_ parent n edgeType
             return n
 

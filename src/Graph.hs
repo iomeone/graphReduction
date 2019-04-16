@@ -19,7 +19,7 @@ import Types
 
 -- type CoreExpr = Term
 
-data VLabeltype =  VLAMBDA | VApp | VVar | VValue | VStack | VStackName
+data VLabeltype =  VLAMBDA | VApp | VVar | VStack | VStackName | VNum
 data  VLabel =VLabel String VLabeltype
 
 type V = (String, VLabel)
@@ -184,12 +184,13 @@ fileGraphParams = G.defaultParams {
        ]
     ],
   G.fmtNode = \(v, VLabel description vl) -> case vl of
-      VVar     -> ( G.toLabel description) : (G.Shape G.Circle) : ( colorAttribute $ G.RGB 0 255 255)
+      VVar     -> ( G.toLabel description) : {-- (G.Shape G.Circle) --}  ( colorAttribute $ G.RGB 0 255 255)
       VLAMBDA  -> ( G.toLabel description) :  (colorAttribute $ G.RGB 226 94 118)
       VApp     -> ( G.toLabel description) : (colorAttribute $ G.RGB 7 102 148)
       VStack     -> ( G.toLabel description) : (colorAttribute $ G.RGBA 0 0 0 0)
-      VStackName     -> ( G.toLabel description) : (colorAttribute $ G.RGBA 0 0 0 0)
-      VValue     -> ( G.toLabel description) : (colorAttribute $ G.RGB 3 183 198),
+      VNum     -> ( G.toLabel description) : (colorAttribute $ G.RGB 38 166 91 )
+      VStackName     -> ( G.toLabel description) : (colorAttribute $ G.RGBA 0 0 0 0),
+      -- VValue     -> ( G.toLabel description) : (colorAttribute $ G.RGB 3 183 198),
       
   G.fmtEdge = \(from, to, el) -> case el of
       EStackLink -> (A.style  A.dotted)  : (colorAttribute $ G.RGBA 0 0 0 20) 

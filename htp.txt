@@ -1,1 +1,1 @@
-main = if (or False False) 7 9 ;  --main = if (and True False) 7 9; 
+main = 1 + 2 ;  --main = if (and True False) 7 9;

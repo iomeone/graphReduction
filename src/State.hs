@@ -42,6 +42,25 @@ data Primitive =
     deriving Show
 
 
+extraPreludeDefs :: Program
+extraPreludeDefs = 
+    [
+        ( "and"
+        , ["x", "y"]
+        , EAp (EAp (EAp (EVar "if") (EVar "x")) (EVar "y")) (EVar "False"))
+      , ( "or"
+        , ["x", "y"]
+        , EAp (EAp (EAp (EVar "if") (EVar "x")) (EVar "True")) (EVar "y"))
+      
+      , ( "not"
+        , ["x"]
+        , EAp (EAp (EAp (EVar "if") (EVar "x")) (EVar "False")) (EVar "True")
+        )     
+        
+    
+    ]
+
+
 primitives :: [ (String , Primitive)]
 primitives = 
     [("negate",     Neg)
@@ -71,13 +90,28 @@ isNumNode (NNum _) = True
 isNumNode _        = False
 
 
-isTrueNode :: Node -> Bool
-isTrueNode (NData 0 []) = True
-isTrueNode _            = False
+-- isTrueNode :: Node -> Bool
+-- isTrueNode (NData 0 []) = True
+-- isTrueNode _            = False
 
-isFalseNode :: Node -> Bool
-isFalseNode (NData 1 []) = True
-isFalseNode _            = False
+isTrueNodeEx :: TiHeap-> Addr -> Bool
+isTrueNodeEx heap addr =   
+    case (hLookup heap addr) of
+        (NData 0 [])     -> True
+        NInd addrind     -> isTrueNodeEx heap addrind
+        _             ->False
+
+
+isFalseNodeEx :: TiHeap-> Addr -> Bool
+isFalseNodeEx heap addr =   
+    case (hLookup heap addr) of
+        (NData 1 [])     -> True
+        NInd addrind     -> isFalseNodeEx heap addrind
+        _             ->False
+
+-- isFalseNode :: Node -> Bool
+-- isFalseNode (NData 1 []) = True
+-- isFalseNode _            = False
 
 
 

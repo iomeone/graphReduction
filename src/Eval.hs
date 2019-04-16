@@ -45,10 +45,15 @@ step state@(stack, _,heap, _, _) = dispatch (hLookup heap (head stack))
 
 dataStep :: TiState -> Integer -> TiState
 dataStep (stack@(_:stackRest), dump, heap, globals, stats) tag = case  dump of
-    d:ds | stackRest /= [] ->error "dataStep: why stackRest is not empty?"
+    d:ds | stackRest /= [] ->error $ "dataStep: why stackRest is not empty?" ++ (show stack)   -- why stackRest is not empty? becasue the 
     d:ds | stackRest == [] ->(d ++ stackRest, ds, heap, globals, stats)
     -- dump a stack out
     -- question ???? stackRest always empty???
+
+    
+
+
+   
 
     _ -> error $"Data constructor applied as a function" ++ show tag
     -- if the state is not Final step and also NData , so the dump must have some stacks !
@@ -133,20 +138,26 @@ primIf (stack@(_ : condition : trueApp : falseApp : restStack), dump, heap, gloa
         conditionNode = hLookup heap condAddr
         
         state1
-            | isTrueNode conditionNode
-            =(trueApp : restStack, dump, hUpdate heap trueApp (NInd trueAddr) , gloabls, stats)
+            | isTrueNodeEx heap condAddr
+            -- =(trueApp : restStack, dump, hUpdate heap trueApp (NInd trueAddr) , gloabls, stats)
+            -- i am so naive ! we should alway update the falseApp addr, bcz, falseApp is the key addr to update(the first stack in dump has some value should be update to NData)
+            =trace "--------------------------------------------------------------------------------is True Node"
+            (falseApp : restStack, dump, hUpdate heap falseApp (NInd trueAddr) , gloabls, stats)
             
-            | isFalseNode conditionNode
-            =(falseApp : restStack, dump, hUpdate heap falseApp (NInd falseAddr), gloabls, stats)
+            | isFalseNodeEx heap condAddr
+            =trace "--------------------------------------------------------------------------------is False Node"
+            (falseApp : restStack, dump, hUpdate heap falseApp (NInd falseAddr), gloabls, stats)
 
 
             | isValueNode conditionNode
             = error "number in if condition"
 
             | otherwise
-            = ([condAddr], stack : dump, heap, gloabls, stats)
+            =trace "--------------------------------------------------------------------------------otherwise"
+            ([condAddr], stack : dump, heap, gloabls, stats)
     in
-        state1
+        trace ("--------------------------------------------------------------------------------primIf addr:" ++ (show condAddr) ++ " " ++ (show $isTrueNodeEx heap condAddr) ++  " " ++ (show $isFalseNodeEx heap condAddr))
+            state1
 
 
 primConstruct :: TiState -> Integer -> Integer -> TiState
@@ -227,16 +238,18 @@ getArgs heap (_ : stack) = map (getArg heap) stack
 getArgs _ [] = []
 
 
--- getArg :: Heap Node -> Addr -> Addr
--- getArg heap addr = arg 
---             where 
---                 (NAp _ arg) = hLookup heap addr
+-- getArg_ :: Heap Node -> Addr -> Addr
+-- getArg_ heap addr = 
+--     case hLookup heap addr of
+--         NAp func arg     -> arg
+--         NInd addr           -> getArg heap addr
+--         x                   -> error $ "getArg: NAp node is expected, but got " ++ (show x )
 
 getArg :: Heap Node -> Addr -> Addr
 getArg heap addr = 
     case hLookup heap addr of
         NAp func arg     -> arg
-        NInd addr           -> getArg heap addr
+        -- NInd addr           -> getArg heap addr
         x                   -> error $ "getArg: NAp node is expected, but got " ++ (show x )
 
 

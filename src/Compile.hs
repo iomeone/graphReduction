@@ -16,7 +16,7 @@ compile program =
         initialStack = [addressOfMain]
         (initialHeap, globals) = buildInitialHeap scDefs
         addressOfMain = aLookup globals "main" (error "main is not defined")
-        scDefs = program ++ preludeDefs
+        scDefs = program ++ preludeDefs ++ extraPreludeDefs
 
 
 

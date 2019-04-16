@@ -81,20 +81,34 @@ graphNode parent n heapAssoc restStackAddr edgeType=  -- ?? shall we avoid to cy
             appN <- addNode "app" VApp
 
                           
-            a1 <- addNode (maybe (show addr1)  
-                                  -- if addr1 is not ValueNode, we just show addr1.
-                                    (\numNode -> show addr1 ++ " " ++ (show numNode)) $ aLookUpValueNode heapAssoc addr1 (error "addr1")) 
-                                   -- if addr1 is  ValueNode, we  show addr1 ++ (show Node).
-                                    VVar
+            a1 <- addNode 
+                        -- (maybe (show addr1)  
+                                -- -- if addr1 is not ValueNode, we just show addr1.
+                                -- (\numNode -> show addr1 ++ " " ++ (show numNode)) $ aLookUpValueNode heapAssoc addr1 (error "addr1")) 
+                                -- -- if addr1 is  ValueNode, we  show addr1 ++ (show Node).
+                         (let node1 = aLookup heapAssoc addr1 (error "addr1.")
+                          in
+                            (if isValueNodeSimple  node1
+                                then show addr1 ++ " " ++ (show node1)
+                                else if isPrimNodeSimple node1
+                                        then show addr1 ++ " " ++ (show node1)
+                                        else show addr1))
 
-            a2 <- addNode (maybe (show addr2) 
-                                 -- if addr2 is not ValueNode, we just show addr1.
-                                 (\numNode -> show addr2 ++ " " ++ (show numNode)) $ aLookUpValueNode heapAssoc addr2 (error "addr2")) 
-                                  -- if addr2 is  ValueNode, we  show addr2 ++ (show Node).
-                                 (if isValueNodeSimple (aLookup heapAssoc addr2 (error "addr2.")) 
-                                    then VNum 
-                                    else VVar  
-                                 )
+
+                        (if isPrimNodeSimple (aLookup heapAssoc addr1 (error "addr1.")) 
+                            then VPrim
+                            else VVar)
+
+            a2 <- addNode (let node2 = aLookup heapAssoc addr2 (error "addr2.")
+                           in
+                            (if isValueNodeSimple  node2
+                                then show addr2 ++ " " ++ (show node2)
+                                else if isPrimNodeSimple node2
+                                        then show addr2 ++ " " ++ (show node2)
+                                        else show addr2))
+                           (if isValueNodeSimple (aLookup heapAssoc addr2 (error "addr2.")) 
+                               then VNum 
+                               else VVar )
 
             addEdge appN a1
             addEdge appN a2
@@ -116,7 +130,7 @@ graphNode parent n heapAssoc restStackAddr edgeType=  -- ?? shall we avoid to cy
                             
         NSupercomb funName argNameList expr -> do
             funDef <- addNode (funName ++ " " ++ (joinBy " ," argNameList) ) VLAMBDA
-            b <- addNode (show expr) VVar 
+            b <- addNode (show expr) VBody 
             addEdge funDef b
 
             addEdge_ parent funDef edgeType
@@ -139,7 +153,7 @@ graphNode parent n heapAssoc restStackAddr edgeType=  -- ?? shall we avoid to cy
             return n
         
         NData tag argList -> do
-            n <- addNode ("NData " ++ show tag ++ show argList) VVar
+            n <- addNode ("NData " ++ show tag ++ show argList) VNum
             addEdge_ parent n edgeType
             return n
 

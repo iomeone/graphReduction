@@ -90,7 +90,9 @@ isNumNode :: Node -> Bool
 isNumNode (NNum _) = True
 isNumNode _        = False
 
-
+isPrimNodeSimple :: Node -> Bool
+isPrimNodeSimple (NPrim _ _) = True
+isPrimNodeSimple _           = False
 
 isValueNodeSimple :: Node -> Bool
 isValueNodeSimple node = 

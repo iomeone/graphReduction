@@ -39,6 +39,8 @@ data Primitive =
     | Div
     | Construct Integer Integer
     | If
+
+    | CasePair
     deriving Show
 
 
@@ -55,7 +57,13 @@ extraPreludeDefs =
       , ( "not"
         , ["x"]
         , EAp (EAp (EAp (EVar "if") (EVar "x")) (EVar "False")) (EVar "True")
-        )     
+        )
+
+      , ("fst", ["p"], EAp (EAp (EVar "casePair") (EVar "p")) (EVar "K"))
+      
+      , ("snd", ["p"], EAp (EAp (EVar "casePair") (EVar "p")) (EVar "K"))
+
+
         
     
     ]
@@ -71,9 +79,10 @@ primitives =
     ,("if",         If)
 
 
-    
-    ,("True" , Construct 0 0)
-    ,("False", Construct 1 0)
+    ,("casePair", CasePair)
+    ,("True"    , Construct 0 0)
+    ,("False"   , Construct 1 0)
+    ,("MkPair"  , Construct 2 2)
     ]
 
 isValueNode :: Node -> Bool
@@ -131,7 +140,8 @@ isFalseNodeEx heap addr =
 -- isFalseNode _            = False
 
 
-
+isPairNode (NData 2 [_, _]) = True
+isPairNode _                = False
 
 type TiState = (TiStack, TiDump, TiHeap, TiGlobals, TiSteps)
 

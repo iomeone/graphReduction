@@ -32,8 +32,8 @@ tiFinal _                                            = False
 step :: TiState -> TiState
 step state@(stack, _,heap, _, _) = dispatch (hLookup heap (head stack))
     where 
-        dispatch (NNum n                    ) = numStep state n
-        dispatch (NAp a1 a2                 ) = apStep state a1 a2
+        dispatch(NNum n                     ) = numStep state n
+        dispatch(NAp a1 a2                  ) = apStep state a1 a2
         dispatch(NSupercomb sc args body    ) = scStep state sc args body
         dispatch(NPrim name primitive       ) = primStep state primitive
         dispatch(NInd addr                  ) = scInd state addr
@@ -124,8 +124,50 @@ primStep state Add = primBinary state (fromBinary (+))
 
 primStep state (Construct tag arity) = primConstruct state tag arity
 primStep state If = primIf state
+primStep state CasePair  = primCasePair state
+
 
 primStep state x = error $ "-----------error :" ++ show x
+
+
+
+
+pairApply heap (NData 2 [x, y]) f = (heap2 ,appNode)
+  where 
+    (heap1, addr ) = hAlloc heap (NAp f x)
+    -- we add (NAp f x) node
+    (heap2, addr1) = hAlloc heap1 (NAp addr y) 
+    -- we add (NAp addr y) node
+
+    appNode = hLookup heap2 addr1
+    -- we get the Node we just allocate
+
+pairApply _ _ _  = error "Function expects a pair"
+
+
+
+primCasePair :: TiState -> TiState
+primCasePair state@(_ : p : f : stackRest, dump, heap, globals, stats) = state1
+ where
+    (pAddr, fAddr) = (getArg heap p, getArg heap f)
+    pair           = hLookup heap pAddr
+    state1
+        | isPairNode pair
+        = let (heap1, app) = pairApply heap pair fAddr
+          in (f : stackRest, dump, hUpdate heap1 f app, globals, stats)
+    
+        | isDataNode pair
+        = error "Expected a pair as argument to casePair"
+        
+        | otherwise
+        = (pAddr : f : stackRest, [p] : dump, heap, globals, stats)
+
+
+primCasePair _ = error "Malformed casePair-expression"        
+
+
+
+
 
 
 

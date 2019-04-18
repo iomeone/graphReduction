@@ -1,7 +1,8 @@
 module State where
 
-
 import Debug.Trace
+
+import Common
 import Types
 
 type Addr = Integer
@@ -98,6 +99,20 @@ isDataNode _           = False
 isNumNode :: Node -> Bool
 isNumNode (NNum _) = True
 isNumNode _        = False
+
+
+
+isAppNodeSimple :: Node -> Bool
+isAppNodeSimple (NAp _ _) = True
+isAppNodeSimple _         = False
+
+isLambdaNodeSimple :: Node -> Bool
+isLambdaNodeSimple (NSupercomb _ _ _ ) = True;
+isLambdaNodeSimple _ = False;
+
+showLambdaNodeSimple :: Node -> String
+showLambdaNodeSimple  (NSupercomb name args _ ) = name ++ " " ++ (joinBy " " args )
+showLambdaNodeSimple  n  = show n
 
 isPrimNodeSimple :: Node -> Bool
 isPrimNodeSimple (NPrim _ _) = True

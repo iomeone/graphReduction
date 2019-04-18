@@ -4,15 +4,16 @@ import qualified Data.GraphViz as G
 import qualified Data.GraphViz.Attributes.Complete as G
 import qualified Data.GraphViz.Types as G
 
-import Types
+import Common
 import Graph
 import State
+import Types
+
 
 type Stack = ([Addr], [(Addr, Node)])
 
 data ParentString = NodeStr String | NameStr String | NoName
 
-joinBy sep list = drop (length sep) $ concat $ map (\item -> sep ++ item) list
 
 
 graphStackItems :: ParentString ->Stack -> Maybe VLabeltype -> Maybe ELabel -> GraphBuilder ()
@@ -87,12 +88,13 @@ graphNode parent n heapAssoc restStackAddr edgeType=  -- ?? shall we avoid to cy
                                 -- (\numNode -> show addr1 ++ " " ++ (show numNode)) $ aLookUpValueNode heapAssoc addr1 (error "addr1")) 
                                 -- -- if addr1 is  ValueNode, we  show addr1 ++ (show Node).
                          (let node1 = aLookup heapAssoc addr1 (error "addr1.")
-                          in
-                            (if isValueNodeSimple  node1
+                          in (if isValueNodeSimple node1 || isPrimNodeSimple  node1
                                 then show addr1 ++ " " ++ (show node1)
-                                else if isPrimNodeSimple node1
-                                        then show addr1 ++ " " ++ (show node1)
-                                        else show addr1))
+                                    else if isLambdaNodeSimple node1
+                                        then show addr1 ++ "    λ : " ++ (showLambdaNodeSimple node1)
+                                        else if isAppNodeSimple node1
+                                            then show addr1 ++ "    (app)"
+                                            else show addr1))
 
 
                         (if isPrimNodeSimple (aLookup heapAssoc addr1 (error "addr1.")) 
@@ -101,11 +103,17 @@ graphNode parent n heapAssoc restStackAddr edgeType=  -- ?? shall we avoid to cy
 
             a2 <- addNode (let node2 = aLookup heapAssoc addr2 (error "addr2.")
                            in
-                            (if isValueNodeSimple  node2
+                            (if isValueNodeSimple  node2 || isPrimNodeSimple node2
                                 then show addr2 ++ " " ++ (show node2)
-                                else if isPrimNodeSimple node2
-                                        then show addr2 ++ " " ++ (show node2)
-                                        else show addr2))
+                                    else if isLambdaNodeSimple node2
+                                        then show addr2 ++ "    λ : " ++ (showLambdaNodeSimple node2)
+                                        else if isAppNodeSimple node2
+                                            then show addr2 ++ "    (app)"  
+                                            else show addr2))
+
+
+
+
                            (if isValueNodeSimple (aLookup heapAssoc addr2 (error "addr2.")) 
                                then VNum 
                                else VVar )

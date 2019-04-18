@@ -149,7 +149,7 @@ pairApply _ _ _  = error "Function expects a pair"
 
 
 primCasePair :: TiState -> TiState
-primCasePair state@(_ : p : f : stackRest, dump, heap, globals, stats) = state1
+primCasePair state@(stack@(caseAddr : p : f : stackRest), dump, heap, globals, stats) = state1
  where
     (pAddr, fAddr) = (getArg heap p, getArg heap f)
     pair           = hLookup heap pAddr
@@ -162,7 +162,8 @@ primCasePair state@(_ : p : f : stackRest, dump, heap, globals, stats) = state1
         = error "Expected a pair as argument to casePair"
         
         | otherwise
-        = (pAddr : f : stackRest, [p] : dump, heap, globals, stats)
+        = ([pAddr] ,stack : dump, heap, globals, stats)
+        -- = ([pAddr],  (p : f : stackRest): dump, heap, globals, stats)
 
 
 primCasePair _ = error "Malformed casePair-expression"        

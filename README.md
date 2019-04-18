@@ -39,3 +39,7 @@ Published by Prentice Hall | January 1992
 ## Simple programm (main = snd (MkPair 2 4);)'s  Graph Reduction Process !
 ### stack is grow upward
 ![snd_MkPair.png](https://raw.githubusercontent.com/iomeone/graphReduction/master/png/snd_MkPair.png)  
+
+## Simple programm (main = snd (MkPair 2 4);)'s  Graph Reduction Process ! Ailrun's method
+### stack is grow upward
+![snd_MkPair2.png](https://raw.githubusercontent.com/iomeone/graphReduction/master/png/snd_MkPair2.png)  

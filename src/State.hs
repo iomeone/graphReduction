@@ -61,7 +61,7 @@ extraPreludeDefs =
 
       , ("fst", ["p"], EAp (EAp (EVar "casePair") (EVar "p")) (EVar "K"))
       
-      , ("snd", ["p"], EAp (EAp (EVar "casePair") (EVar "p")) (EVar "K"))
+      , ("snd", ["p"], EAp (EAp (EVar "casePair") (EVar "p")) (EVar "K1"))
 
 
         

@@ -268,7 +268,10 @@ instantiateAndUpdate (EAp e1 e2) heap env addr =
         (heap2, a2) = instantiate e2 heap1 env
     in hUpdate heap2 addr (NAp a1 a2)
     
-    
+
+
+instantiateAndUpdate (EConst tag arity) heap _ addr =
+  hUpdate heap addr (NPrim "Pack" (Construct tag arity))    
 
 
 

@@ -64,7 +64,12 @@ extraPreludeDefs =
       
       , ("snd", ["p"], EAp (EAp (EVar "casePair") (EVar "p")) (EVar "K1"))
 
+      , ("True", [], EConst 0 0)
 
+      , ("False", [], EConst 1 0)
+
+
+    --   , ("Cons", [], EConst 3 2)
         
     
     ]
@@ -81,8 +86,8 @@ primitives =
 
 
     ,("casePair", CasePair)
-    ,("True"    , Construct 0 0)
-    ,("False"   , Construct 1 0)
+    -- ,("True"    , Construct 0 0)
+    -- ,("False"   , Construct 1 0)
     ,("MkPair"  , Construct 2 2)
     ]
 

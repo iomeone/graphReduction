@@ -45,12 +45,12 @@ step state@(stack, _,heap, _, _) = dispatch (hLookup heap (head stack))
 
 dataStep :: TiState -> Integer -> TiState
 dataStep (stack@(_:stackRest), dump, heap, globals, stats) tag = case  dump of
-    -- d:ds | stackRest /= [] ->error $ "dataStep: why stackRest is not empty?" ++ (show stack)   -- why stackRest is not empty? becasue the 
-    -- d:ds | stackRest == [] ->(d ++ stackRest, ds, heap, globals, stats)
+    d:ds | stackRest /= [] ->error $ "dataStep: why stackRest is not empty?" ++ (show stack)   -- why stackRest is not empty? becasue the 
+    d:ds | stackRest == [] ->(d ++ stackRest, ds, heap, globals, stats)
     -- dump a stack out
     -- question ???? stackRest always empty???
 
-    d:ds  ->(d ++ stackRest, ds, heap, globals, stats)
+    -- d:ds  ->(d ++ stackRest, ds, heap, globals, stats)
 
     
 

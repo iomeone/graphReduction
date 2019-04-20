@@ -64,12 +64,13 @@ extraPreludeDefs =
       
       , ("snd", ["p"], EAp (EAp (EVar "casePair") (EVar "p")) (EVar "K1"))
 
-      , ("True", [], EConst 0 0)
+      , ("True", [],  EConst 0 0)
 
       , ("False", [], EConst 1 0)
 
 
-    --   , ("Cons", [], EConst 3 2)
+      , ("Nil", [],   EConst 2 0)
+      , ("Cons", [],  EConst 3 2)
         
     
     ]

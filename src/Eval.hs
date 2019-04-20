@@ -133,7 +133,7 @@ primStep state x = error $ "-----------error :" ++ show x
 
 
 
-
+pairApply :: Heap Node -> Node -> Addr -> (Heap Node, Node)
 pairApply heap (NData 2 [x, y]) f = (heap2 ,appNode)
   where 
     (heap1, addr ) = hAlloc heap (NAp f x)
@@ -167,6 +167,81 @@ primCasePair state@(stack@(caseAddr : p : f : stackRest), dump, heap, globals, s
 
 
 primCasePair _ = error "Malformed casePair-expression"        
+
+
+
+listApply  :: Heap Node -> Node -> Addr -> Addr -> (Heap Node, Node)
+listApply heap (NData 2 []) continueFunAddr initValAddr= 
+    (heap, (NInd initValAddr))
+
+    -- if the list node is a nil node, we just return the init value.
+    -- the reason why we use NInd is that we will not compute the init value until we really need it.
+
+
+listApply heap (NData 3 [headAddr, tailAddr]) continueFunAddr initValAddr = 
+    (heap2, appNode)
+    where 
+        (heap1, firstApplyToHead) = hAlloc heap (NAp continueFunAddr headAddr)
+        -- for example we compute
+        -- length xs = caseList xs 0 length'
+        -- length' x xs = 1 + length xs
+        
+        -- this line of code is do the : length' x 
+
+
+        (heap2, sndApplyToTail)   = hAlloc heap1(NAp firstApplyToHead tailAddr)
+
+        -- this line of code is do the : length' x xs
+
+
+        appNode = hLookup heap2 sndApplyToTail
+
+        -- we get the Node we just allocate
+
+
+
+
+
+
+
+primCaseList state@(stack@(app_x_caseAddr : app_x_lstAddr : app_x_initValAddr : app_x_continueFunAddr : stackRest), dump, heap, gloabls, stats) 
+    | length args < 3 = error "primCaseList: wrong number of args"
+    | not (isDataNode listNode) = ([lstAddr], stack : dump, heap, gloabls, stats)
+    | otherwise = (newStack, dump, newHeap, gloabls, stats)
+        where 
+            args = getArgs heap stack 
+
+            (lstAddr : initValAddr : continueFunAddr : rest) = args
+
+            listNode = hLookup heap lstAddr 
+
+            newStack = drop 3 stack
+            -- we drop the app_x_caseAddr app_x_lstAddr app_x_initValAddr and let app_x_continueFunAddr be the new root.
+
+            root_of_redex = head newStack
+            -- we get the root of redex's pointer
+
+            NData tag compts = listNode
+            -- current listNode is must be an NData node, because if it is not, we put it in the stack and compute it first.
+
+            [headLst, remainLst] = compts
+
+            (newHeap, newAppNode) = listApply heap listNode continueFunAddr initValAddr
+            -- we convert the caselist function to continue function .
+            -- for example: we convert length xs = caseList xs 0 length' to  length' x xs  
+            -- note: length' x xs = 1 + length xs
+
+        
+
+
+
+
+
+
+
+    
+
+
 
 
 

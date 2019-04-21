@@ -125,11 +125,14 @@ primStep state Add = primBinary state (fromBinary (+))
 
 
 primStep state (Construct tag arity) = primConstruct state tag arity
-primStep state If = primIf state
+primStep state If        = primIf state
 primStep state CasePair  = primCasePair state
 primStep state CaseList  = primCaseList state
 
-primStep state x = error $ "-----------error :" ++ show x
+primStep state Abort     = error "Program is aborted by abort primitive!"
+
+-- primStep state Print     = 
+primStep state x         = error $ "-----------error :" ++ show x
 
 
 

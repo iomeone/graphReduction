@@ -1,4 +1,4 @@
-main =  length (Cons 2 (Cons 7 Nil));  
+main =  length (Cons 2 Nil);
 
 length x = caseList x 0 lenght2 ;
 lenght2 x xs = x + (length xs); 

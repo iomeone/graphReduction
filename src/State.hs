@@ -43,6 +43,8 @@ data Primitive =
 
     | CasePair
     | CaseList
+    | Abort
+    | Print
     deriving Show
 
 
@@ -72,8 +74,19 @@ extraPreludeDefs =
 
       , ("Nil", [],   EConst 2 0)
       , ("Cons", [],  EConst 3 2)
-        
-    
+      
+      , ("head", ["xs"], EAp (EAp (EAp (EVar "caseList") (EVar "xs"))
+                                       (EVar "abort"))
+                                   (EVar "K"))
+
+      , ("tail", ["xs"], EAp (EAp (EAp (EVar "caseList") (EVar "xs"))
+                                       (EVar "abort"))
+                                   (EVar "K1"))
+
+
+    , ("printList", ["xs"], EAp (EAp (EAp (EVar "caseList") (EVar "xs")) (EVar "stop")) (EVar "printCons"))
+    , ("printCons", ["h", "t"], EAp (EAp (EVar "print") (EVar "h")) (EAp (EVar "printList") (EVar "t")))
+            
     ]
 
 
@@ -91,6 +104,7 @@ primitives =
     -- ,("True"    , Construct 0 0)
     -- ,("False"   , Construct 1 0)
     ,("MkPair"  , Construct 2 2)
+    ,("abort", Abort)
     ]
 
 isValueNode :: Node -> Bool

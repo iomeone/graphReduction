@@ -127,7 +127,7 @@ primStep state Add = primBinary state (fromBinary (+))
 primStep state (Construct tag arity) = primConstruct state tag arity
 primStep state If = primIf state
 primStep state CasePair  = primCasePair state
-
+primStep state CaseList  = primCaseList state
 
 primStep state x = error $ "-----------error :" ++ show x
 
@@ -206,8 +206,8 @@ listApply heap (NData 3 [headAddr, tailAddr]) continueFunAddr initValAddr =
 
 primCaseList state@(stack@(app_x_caseAddr : app_x_lstAddr : app_x_initValAddr : app_x_continueFunAddr : stackRest), dump, heap, gloabls, stats) 
     | length args < 3 = error "primCaseList: wrong number of args"
-    | not (isDataNode listNode) = ([lstAddr], stack : dump, heap, gloabls, stats)
-    | otherwise = (newStack, dump, newHeap, gloabls, stats)
+    | not (isValueNode listNode) = ([lstAddr], stack : dump, heap, gloabls, stats)
+    | otherwise = (newStack, dump, updatedNewHeap, gloabls, stats)
         where 
             args = getArgs heap stack 
 
@@ -231,7 +231,8 @@ primCaseList state@(stack@(app_x_caseAddr : app_x_lstAddr : app_x_initValAddr : 
             -- for example: we convert length xs = caseList xs 0 length' to  length' x xs  
             -- note: length' x xs = 1 + length xs
 
-        
+            updatedNewHeap = hUpdate newHeap root_of_redex newAppNode
+            -- we update the root_of_redex with newAppNode
 
 
 
@@ -342,11 +343,11 @@ instantiateAndUpdate (EAp e1 e2) heap env addr =
     let (heap1, a1) = instantiate e1 heap env
         (heap2, a2) = instantiate e2 heap1 env
     in hUpdate heap2 addr (NAp a1 a2)
-    
+
 
 
 instantiateAndUpdate (EConst tag arity) heap _ addr =
-  hUpdate heap addr (NPrim "Pack" (Construct tag arity))    
+  hUpdate heap addr (NPrim "Pack" (Construct tag arity))
 
 
 

@@ -42,6 +42,7 @@ data Primitive =
     | If
 
     | CasePair
+    | CaseList
     deriving Show
 
 
@@ -85,7 +86,7 @@ primitives =
     ,("/",          Div)
     ,("if",         If)
 
-
+    ,("caseList", CaseList)
     ,("casePair", CasePair)
     -- ,("True"    , Construct 0 0)
     -- ,("False"   , Construct 1 0)

@@ -23,14 +23,14 @@ incStep = applyToSteps tiStepInc
 
 
 tiFinal :: TiState -> Bool
-tiFinal ([isOnlyDataAddr], [], heap, gloabls, steps) = isValueNode (hLookup heap isOnlyDataAddr)
+tiFinal (output, [isOnlyDataAddr], [], heap, gloabls, steps) = isValueNode (hLookup heap isOnlyDataAddr)
 -- if current stack has only one data, comutation is done!
-tiFinal ([]     , [], _, _, _)                       = error "Empty stack"
+tiFinal (output, []     , [], _, _, _)                       = error "Empty stack"
 tiFinal _                                            = False
 
 
 step :: TiState -> TiState
-step state@(stack, _,heap, _, _) = dispatch (hLookup heap (head stack))
+step state@(output, stack, _,heap, _, _) = dispatch (hLookup heap (head stack))
     where 
         dispatch(NNum n                     ) = numStep state n
         dispatch(NAp a1 a2                  ) = apStep state a1 a2
@@ -44,9 +44,9 @@ step state@(stack, _,heap, _, _) = dispatch (hLookup heap (head stack))
 
 
 dataStep :: TiState -> Integer -> TiState
-dataStep (stack@(_:stackRest), dump, heap, globals, stats) tag = case  dump of
+dataStep (output, stack@(_:stackRest), dump, heap, globals, stats) tag = case  dump of
     d:ds | stackRest /= [] ->error $ "dataStep: why stackRest is not empty?" ++ (show stack)   -- why stackRest is not empty? becasue the 
-    d:ds | stackRest == [] ->(d ++ stackRest, ds, heap, globals, stats)
+    d:ds | stackRest == [] ->(output, d ++ stackRest, ds, heap, globals, stats)
     -- dump a stack out
     -- question ???? stackRest always empty???
 
@@ -63,36 +63,36 @@ dataStep (stack@(_:stackRest), dump, heap, globals, stats) tag = case  dump of
 
 
 numStep :: TiState -> Integer -> TiState
-numStep (stack@(_ : stackRest), dump, heap, globals, steps) n = case dump of
+numStep (output, stack@(_ : stackRest), dump, heap, globals, steps) n = case dump of
     d:ds | stackRest /= [] -> error "numStep: why stackRest is not empty?"
-    d:ds | stackRest == [] -> (d ++ stackRest, ds, heap, globals, steps)
+    d:ds | stackRest == [] -> (output, d ++ stackRest, ds, heap, globals, steps)
 
     _  ->error $ "Number applied as a function" ++ show n
 
 
 
 apStep :: TiState -> Addr -> Addr -> TiState
-apStep (stack@(top : _) , dump, heap, globals, steps) a1 a2 = 
+apStep (output, stack@(top : _) , dump, heap, globals, steps) a1 a2 = 
     case hLookup heap a2 of
-        NInd a3 -> (a1 : stack, dump, hUpdate heap top (NAp a1 a3), globals, steps)
+        NInd a3 -> (output, a1 : stack, dump, hUpdate heap top (NAp a1 a3), globals, steps)
         -- if a2 is an indirect computation, we convert it to the direct computation
         -- we put a1 to the stack because we now start the a1 computation.
 
-        _ -> (a1: stack, dump, heap, globals, steps)
+        _ -> (output, a1: stack, dump, heap, globals, steps)
         -- we just simple compute the a1
 
 
 
 
 scInd :: TiState -> Addr -> TiState
-scInd (stack, dump, heap, gloabls, steps) addr = 
-    (addr : tail stack, dump, heap, gloabls, steps)
+scInd (output, stack, dump, heap, gloabls, steps) addr = 
+    (output, addr : tail stack, dump, heap, gloabls, steps)
     -- if current computation is an indirect computation, we just computate it's inner expr(addr points).
 
 
 scStep :: TiState -> String -> [String] -> Expr -> TiState
-scStep (stack@(stackTop : stackRest), dump, heap, globals, steps) sc argNames body
-        =(stack1, dump, heap1, globals, steps)
+scStep (output, stack@(stackTop : stackRest), dump, heap, globals, steps) sc argNames body
+        =(output, stack1, dump, heap1, globals, steps)
         where 
             root = stack !! length argNames
             -- root is the foremost pos which the scNode(sc is super combination) occupied.
@@ -128,11 +128,38 @@ primStep state (Construct tag arity) = primConstruct state tag arity
 primStep state If        = primIf state
 primStep state CasePair  = primCasePair state
 primStep state CaseList  = primCaseList state
-
 primStep state Abort     = error "Program is aborted by abort primitive!"
 
--- primStep state Print     = 
+primStep state Print     = primPrint state
+
 primStep state x         = error $ "-----------error :" ++ show x
+
+
+
+primStop :: TiState -> TiState
+primStop (output, [_], [], heap, globals, stats)
+  = (output, [], [], heap, globals, stats)
+primStop (_, _, [], _, _, _) = error "Wrong stack for stop is dectected"
+primStop _ = error "Wrong dump for stop is dectected"
+
+
+
+
+primPrint :: TiState -> TiState
+-- primPrint state = error "not implement"
+primPrint state@(output, stack@(printItem : headItem : nxtRecursiveCallItem : _), [], heap, globals, stats)
+  = case headItemNode of 
+      NNum v -> (v : output, [nxtRecursiveCallItemAddr], [], heap, globals, stats)
+      _
+        | isDataNode headItemNode -> error "Wrong data type for print is detected"
+        | otherwise -> (output, [headItemAddr], [stack], heap, globals, stats)
+
+  where 
+    headItemAddr : nxtRecursiveCallItemAddr : _ = getArgs heap stack
+    headItemNode = hLookup heap headItemAddr
+
+primPrint (_, _, [], _, _, _) = error "Wrong stack for print is dectected"
+primPrint _ = error "Wrong dump for print is dectected"
 
 
 
@@ -152,20 +179,20 @@ pairApply _ _ _  = error "Function expects a pair"
 
 
 primCasePair :: TiState -> TiState
-primCasePair state@(stack@(caseAddr : p : f : stackRest), dump, heap, globals, stats) = state1
+primCasePair state@(output, stack@(caseAddr : p : f : stackRest), dump, heap, globals, stats) = state1
  where
     (pAddr, fAddr) = (getArg heap p, getArg heap f)
     pair           = hLookup heap pAddr
     state1
         | isPairNode pair
         = let (heap1, app) = pairApply heap pair fAddr
-          in (f : stackRest, dump, hUpdate heap1 f app, globals, stats)
+          in (output, f : stackRest, dump, hUpdate heap1 f app, globals, stats)
     
         | isDataNode pair
         = error "Expected a pair as argument to casePair"
         
         | otherwise
-        = ([pAddr] ,stack : dump, heap, globals, stats)
+        = (output, [pAddr] ,stack : dump, heap, globals, stats)
         -- = ([pAddr],  (p : f : stackRest): dump, heap, globals, stats)
 
 
@@ -207,10 +234,10 @@ listApply heap (NData 3 [headAddr, tailAddr]) continueFunAddr initValAddr =
 
 
 
-primCaseList state@(stack@(app_x_caseAddr : app_x_lstAddr : app_x_initValAddr : app_x_continueFunAddr : stackRest), dump, heap, gloabls, stats) 
+primCaseList state@(output, stack@(app_x_caseAddr : app_x_lstAddr : app_x_initValAddr : app_x_continueFunAddr : stackRest), dump, heap, gloabls, stats) 
     | length args < 3 = error "primCaseList: wrong number of args"
-    | not (isValueNode listNode) = ([lstAddr], stack : dump, heap, gloabls, stats)
-    | otherwise = (newStack, dump, updatedNewHeap, gloabls, stats)
+    | not (isValueNode listNode) = (output, [lstAddr], stack : dump, heap, gloabls, stats)
+    | otherwise = (output, newStack, dump, updatedNewHeap, gloabls, stats)
         where 
             args = getArgs heap stack 
 
@@ -254,7 +281,7 @@ primCaseList state@(stack@(app_x_caseAddr : app_x_lstAddr : app_x_initValAddr : 
 
 
 primIf :: TiState -> TiState
-primIf (stack@(_ : condition : trueApp : falseApp : restStack), dump, heap, gloabls, stats) = 
+primIf (output, stack@( _ : condition : trueApp : falseApp : restStack), dump, heap, gloabls, stats) = 
     let
         (condAddr, trueAddr, falseAddr) = 
             (getArg heap condition, getArg heap trueApp, getArg heap falseApp)
@@ -266,11 +293,11 @@ primIf (stack@(_ : condition : trueApp : falseApp : restStack), dump, heap, gloa
             -- =(trueApp : restStack, dump, hUpdate heap trueApp (NInd trueAddr) , gloabls, stats)
             -- i am so naive ! we should alway update the falseApp addr, bcz, falseApp is the key addr to update(the first stack in dump has some value should be update to NData)
             =trace "--------------------------------------------------------------------------------is True Node"
-            (falseApp : restStack, dump, hUpdate heap falseApp (NInd trueAddr) , gloabls, stats)
+            (output, falseApp : restStack, dump, hUpdate heap falseApp (NInd trueAddr) , gloabls, stats)
             
             | isFalseNodeEx heap condAddr
             =trace "--------------------------------------------------------------------------------is False Node"
-            (falseApp : restStack, dump, hUpdate heap falseApp (NInd falseAddr), gloabls, stats)
+            (output, falseApp : restStack, dump, hUpdate heap falseApp (NInd falseAddr), gloabls, stats)
 
 
             | isValueNode conditionNode
@@ -278,23 +305,23 @@ primIf (stack@(_ : condition : trueApp : falseApp : restStack), dump, heap, gloa
 
             | otherwise
             =trace "--------------------------------------------------------------------------------otherwise"
-            ([condAddr], stack : dump, heap, gloabls, stats)
+            (output, [condAddr], stack : dump, heap, gloabls, stats)
     in
         trace ("--------------------------------------------------------------------------------primIf addr:" ++ (show condAddr) ++ " " ++ (show $isTrueNodeEx heap condAddr) ++  " " ++ (show $isFalseNodeEx heap condAddr))
             state1
 
 
 primConstruct :: TiState -> Integer -> Integer -> TiState
-primConstruct (stack@(root : restStack), dump, heap, globals, steps) tag arity
+primConstruct (output, stack@(root : restStack), dump, heap, globals, steps) tag arity
     = let args = take (fromIntegral arity) (getArgs heap stack)
           stackNew = drop (length args) stack
 
           heap1 = hUpdate heap (head stackNew) (NData tag args)
-       in (stackNew, dump, heap1, globals, steps)
+       in (output, stackNew, dump, heap1, globals, steps)
 
 
 primBinary :: TiState -> (Node -> Node -> Node) -> TiState
-primBinary (stack@(_ : xRoot : yRoot : stackRest), dump, heap, globals, steps) f
+primBinary (output, stack@(_ : xRoot : yRoot : stackRest), dump, heap, globals, steps) f
         -- = trace "------------------------------------------primBinary" state1
     = state1
     where
@@ -303,15 +330,15 @@ primBinary (stack@(_ : xRoot : yRoot : stackRest), dump, heap, globals, steps) f
         state1
             | isNumNode x && isNumNode y
             = let heap1 = hUpdate heap yRoot (f x y)
-              in (yRoot : stackRest, dump, heap1, globals, steps)
+              in (output, yRoot : stackRest, dump, heap1, globals, steps)
               -- we update the node yRoot pointer. which is the result we compute just.
 
 
             | not (isNumNode x)
-            = ([xAddr], [yRoot] : dump, heap, globals, steps)
+            = (output, [xAddr], [yRoot] : dump, heap, globals, steps)
               -- if xNode is not num, we put the xAddr in the new stack, and start another stack computation.
             | not (isNumNode y)
-            =([yAddr], [yRoot] : dump, heap, globals, steps)
+            =(output, [yAddr], [yRoot] : dump, heap, globals, steps)
               -- if yNode is not num, we put the yAddr in the new stack, and start another stack computation.
 
 

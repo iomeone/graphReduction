@@ -51,7 +51,7 @@ showStackProcess stackAddrList_AddrNodeList_List = do
 
 
 getStack :: TiState -> ([Addr], [(Addr, Node)])
-getStack state@(addrLst, dump, heap@(Heap size freeList addrNodeList), globals, steps) = 
+getStack state@(output, addrLst, dump, heap@(Heap size freeList addrNodeList), globals, steps) = 
     (addrLst, addrNodeList)
 
 

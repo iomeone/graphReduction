@@ -11,7 +11,7 @@ import State
 
 compile :: Program -> TiState
 compile program = 
-    (initialStack, initialTiDump, initialHeap, globals, tiStepInitial)
+    ([], initialStack, initialTiDump, initialHeap, globals, tiStepInitial)
     where
         initialStack = [addressOfMain]
         (initialHeap, globals) = buildInitialHeap scDefs

@@ -179,7 +179,10 @@ isFalseNodeEx heap addr =
 isPairNode (NData 2 [_, _]) = True
 isPairNode _                = False
 
-type TiState = (TiStack, TiDump, TiHeap, TiGlobals, TiSteps)
+
+type TiOutput = [Addr]
+
+type TiState = (TiOutput, TiStack, TiDump, TiHeap, TiGlobals, TiSteps)
 
 type TiStack = [Addr]               --the current going on computation 
 
@@ -295,7 +298,7 @@ tiStepGetStep (TiSteps n) = n
 
 --change the steps inside the TiState structure
 applyToSteps :: (TiSteps -> TiSteps) -> TiState -> TiState
-applyToSteps stepsFun (stack, dump, heap, scDefs, steps) = 
-    (stack, dump, heap, scDefs, (stepsFun steps))
+applyToSteps stepsFun (output, stack, dump, heap, scDefs, steps) = 
+    (output, stack, dump, heap, scDefs, (stepsFun steps))
 
 

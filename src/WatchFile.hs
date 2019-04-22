@@ -27,32 +27,29 @@ import UTF8
 
 
 
-addrToNode :: ([Addr], [(Addr, Node)]) -> [(Addr, Node)]
-addrToNode stackAddrList_AddrNodeList@(stackAddrList, addrNodeList)= 
+addrToNode :: ([Integer], [Addr], [(Addr, Node)]) -> [(Addr, Node, [Integer])]
+addrToNode outputList_stackAddrList_AddrNodeList@(outputList, stackAddrList, addrNodeList)= 
     fmap addrToAddrNode stackAddrList 
     where 
-        addrToAddrNode :: Addr -> (Addr, Node)
+        addrToAddrNode :: Addr -> (Addr, Node, [Integer])
         addrToAddrNode addr = 
-            (addr, (aLookup addrNodeList addr (error "addrToAddrNode")))
+            (addr, (aLookup addrNodeList addr (error "addrToAddrNode")), outputList)
 
 
 
-showStackProcess :: [([Addr], [(Addr, Node)])] -> IO ()
-showStackProcess stackAddrList_AddrNodeList_List = do
+showStackProcess :: [([Integer], [Addr], [(Addr, Node)])] -> IO ()
+showStackProcess outputList_stackAddrList_AddrNodeList_List = do
     putStrLn $ unlines x
     return  ()
     where 
-        x =  fmap show (  fmap addrToNode stackAddrList_AddrNodeList_List)
+        x =  fmap show (  fmap addrToNode outputList_stackAddrList_AddrNodeList_List)
 
 
 
 
-
-
-
-getStack :: TiState -> ([Addr], [(Addr, Node)])
+getStack :: TiState -> ([Integer], [Addr], [(Addr, Node)])
 getStack state@(output, addrLst, dump, heap@(Heap size freeList addrNodeList), globals, steps) = 
-    (addrLst, addrNodeList)
+    (output, addrLst, addrNodeList)
 
 
 
@@ -61,18 +58,18 @@ toCompile program = do
     putStrLn "-------------------------\n Init state is:" 
     putStrLn $ show state
     putStrLn "-------------------------\n Evaled states is:" 
-    showStackProcess stackAddrList_AddrNodeList_List
+    showStackProcess outputList_stackAddrList_AddrNodeList_List
 
     curDir <- getCurrentDirectory
-    drawStackEx ["eval step:"] (curDir </> "png" </> "eval") [  reverstack stackAddrList_AddrNodeList_List ]
+    drawStackEx ["eval step:"] (curDir </> "png" </> "eval") [  reverstack outputList_stackAddrList_AddrNodeList_List ]
 
     where
         state = compile program
         states = eval state
-        stackAddrList_AddrNodeList_List = fmap getStack states
-        reverstack :: [([Addr], [(Addr, Node)])] -> [([Addr], [(Addr, Node)])] 
-        reverstack ((addrlist, assocList) : xs) = 
-            (reverse addrlist, assocList) : (reverstack xs)
+        outputList_stackAddrList_AddrNodeList_List = fmap getStack states
+        reverstack :: [([Integer], [Addr], [(Addr, Node)])] -> [( [Addr], [(Addr, Node)])] 
+        reverstack ((outputList, addrlist, assocList) : xs) = 
+            ( reverse addrlist, assocList) : (reverstack xs)
         reverstack [] = []
 
 

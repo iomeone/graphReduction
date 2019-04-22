@@ -1,10 +1,10 @@
-main =  length (Cons 2 Nil);
+main =  printList (Cons 3 (Cons 2 Nil));
 
 length x = caseList x 0 lenght2 ;
 lenght2 x xs = x + (length xs); 
 
 -- main =  length (Cons 2 (Cons 3 (Cons 4 Nil)) );  
 
---main = if (and True False) 7 9;
+-- main = if (and True False) 7 9;
 
 --main = snd (MkPair 5 4); 

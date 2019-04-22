@@ -25,8 +25,15 @@ incStep = applyToSteps tiStepInc
 tiFinal :: TiState -> Bool
 tiFinal (output, [isOnlyDataAddr], [], heap, gloabls, steps) = isValueNode (hLookup heap isOnlyDataAddr)
 -- if current stack has only one data, comutation is done!
-tiFinal (output, []     , [], _, _, _)                       = error "Empty stack"
-tiFinal _                                            = False
+
+
+-- tiFinal (output, stack@[]     , [], _, _, _)      = error $ "Empty stack: " ++ show stack 
+
+-- if we add printList, when we meet stop primitives, we empty the stack, so we get the empty stack and set the result true
+tiFinal (output, stack@[]     , [], _, _, _)      = True
+
+
+tiFinal _                                   = False
 
 
 step :: TiState -> TiState
@@ -131,7 +138,7 @@ primStep state CaseList  = primCaseList state
 primStep state Abort     = error "Program is aborted by abort primitive!"
 
 primStep state Print     = primPrint state
-
+primStep state Stop      = primStop state
 primStep state x         = error $ "-----------error :" ++ show x
 
 

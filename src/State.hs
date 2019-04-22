@@ -45,6 +45,7 @@ data Primitive =
     | CaseList
     | Abort
     | Print
+    | Stop
     deriving Show
 
 
@@ -105,6 +106,8 @@ primitives =
     -- ,("False"   , Construct 1 0)
     ,("MkPair"  , Construct 2 2)
     ,("abort", Abort)
+    ,("print", Print)
+    ,("stop", Stop)
     ]
 
 isValueNode :: Node -> Bool

@@ -179,9 +179,15 @@ isFalseNodeEx heap addr =
 -- isFalseNode _            = False
 
 
-isPairNode (NData 2 [_, _]) = True
-isPairNode _                = False
+isPairNode (NData 2 [_, _])  = True
+isPairNode _                 = False
 
+isPairNodeEx :: TiHeap-> Addr -> Bool
+isPairNodeEx heap pairAddr =   
+    case (hLookup heap pairAddr) of
+        (NData 2 [_, _])        -> True
+        NInd addrind            -> isPairNodeEx heap addrind
+        _                       ->False
 
 type TiOutput = [Addr]
 

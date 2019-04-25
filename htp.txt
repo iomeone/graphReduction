@@ -1,7 +1,4 @@
-main =  printList (Cons 3 (Cons 2 Nil));
-
-length x = caseList x 0 lenght2 ;
-lenght2 x xs = x + (length xs); 
+f x = if False (MkPair 3 4) (MkPair 5 6); main = snd (f 4);
 
 -- main =  length (Cons 2 (Cons 3 (Cons 4 Nil)) );  
 

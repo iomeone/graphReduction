@@ -181,7 +181,8 @@ pairApply heap (NData 2 [x, y]) f = (heap2 ,appNode)
     appNode = hLookup heap2 addr1
     -- we get the Node we just allocate
 
-pairApply _ _ _  = error "Function expects a pair"
+pairApply heap (NInd addrind) f   =   pairApply heap (hLookup heap addrind) f
+pairApply _ _ _                   =   error "Function expects a pair"
 
 
 
@@ -191,7 +192,7 @@ primCasePair state@(output, stack@(caseAddr : p : f : stackRest), dump, heap, gl
     (pAddr, fAddr) = (getArg heap p, getArg heap f)
     pair           = hLookup heap pAddr
     state1
-        | isPairNode pair
+        | isPairNodeEx heap pAddr 
         = let (heap1, app) = pairApply heap pair fAddr
           in (output, f : stackRest, dump, hUpdate heap1 f app, globals, stats)
     
